@@ -8,6 +8,10 @@
 > - 语义：`MAJOR.MINOR.PATCH`。破坏性大改 → MAJOR；新增功能（如新平台/新组件）→ MINOR；修 bug/小改 → PATCH。
 > - 改完重新出包：`npm run dist:win`（Windows）、安卓见 `src/standalone/capacitor/README.md`。
 
+## 1.7.2 — 2026-09-07
+- **修复手机端凭证 Provider 下拉为空**（真机反馈）：引擎搬家后 Capacitor 打包 shim 的路径匹配静默失效，动态注册表被打进 WebView 导致 provider 加载全失败。修复后 12 个 adapter 静态内联，仪表盘/凭证/小组件一并恢复。
+- 版本 1.7.2（安卓 versionCode 16）。装了 1.7.1 的用户可直接覆盖安装（同签名）。
+
 ## 1.7.1 — 2026-09-07
 - **安卓发布构建切换**：`npm run apk` 改为出 release 构建（minify + shrinkResources，体积 4.2MB→1.8MB，-57%，且不带 debuggable 标志）；产物命名去掉 debug——`release-android/yuliang-<版本>.apk` + 固定名 `yuliang.apk`。无正式证书期间以 debug 密钥签 release 包（可安装、不可调试），升级仍需卸载重装；拿到 keystore 后删 gradle 里 signingConfig 一行即切正式签名。
 - **安卓凭证真加密**：新增 SecureCodec 插件（Android Keystore AES-256-GCM，密钥不可导出、卸载即销毁），capacitorStore 接入后凭证落盘为密文；存量明文自动平滑迁移，解密失败如实降级。附 5 个加密链路单测。
