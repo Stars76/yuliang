@@ -1,0 +1,24 @@
+name: verify
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 后端 + provider + 引擎测试
+        run: npm test
+
+      - name: 前端构建
+        run: |
+          npm ci --prefix src/web
+          npm run build:web

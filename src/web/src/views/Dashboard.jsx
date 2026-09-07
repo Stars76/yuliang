@@ -17,6 +17,12 @@ import {
   setAccountOrder,
   subscribeTick,
   windowLevel,
+  THRESHOLD_OPTIONS,
+  getThreshold,
+  setThreshold,
+  getAlertedSet,
+  saveAlertedSet,
+  evaluateAlerts,
 } from '../util.js';
 import { EmptyState, SkeletonCard, useToast } from '../components/Toast.jsx';
 
@@ -42,6 +48,8 @@ export default function Dashboard() {
   const [collapsed, setCollapsed] = useState({}); // provider -> boolean
   const [refreshing, setRefreshing] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const [threshold, setThresholdState] = useState(getThreshold);
+  const [nearLimitIds, setNearLimitIds] = useState(() => new Set());
   const toast = useToast();
   const firedRef = useRef(new Set());
   const dragProviderRef = useRef(null);
@@ -56,6 +64,34 @@ export default function Dashboard() {
     const rest = accounts.filter((a) => !accountOrder.includes(a.accountId));
     return [...ordered, ...rest];
   }, [accounts, accountOrder]);
+
+  // 阈值提醒检测：每次数据到达后跑一次；fire 弹 Toast（一次性），rearm/stale 维护已提醒集合
+  const alertedRef = useRef(getAlertedSet());
+  useEffect(() => {
+    if (!accounts) return;
+    const { fire, rearm, stale } = evaluateAlerts(accounts, threshold, alertedRef.current);
+    if (fire.length > 0) {
+      for (const f of fire) {
+        alertedRef.current.add(f.key);
+        toast(`${f.alias} 的「${f.window}」窗口已用 ${f.used}%，即将打满`, 'warn');
+      }
+      saveAlertedSet(alertedRef.current);
+    }
+    if (rearm.length > 0 || stale.length > 0) {
+      for (const k of rearm) alertedRef.current.delete(k);
+      for (const k of stale) alertedRef.current.delete(k);
+      saveAlertedSet(alertedRef.current);
+    }
+    const ids = new Set();
+    for (const a of accounts) {
+      if (a.error) continue;
+      if ((a.windows ?? []).some((w) => w.usedPercent != null && w.usedPercent >= threshold)) ids.add(a.accountId);
+    }
+    setNearLimitIds((prev) => {
+      if (prev.size === ids.size && [...ids].every((x) => prev.has(x))) return prev;
+      return ids;
+    });
+  }, [accounts, threshold, toast]);
 
   const load = useCallback(async (silent) => {
     try {
@@ -216,6 +252,24 @@ export default function Dashboard() {
               </button>
             ))}
           </div>
+          <label className="switch-row threshold-ctl" title="用量达到该比例时提醒">
+            <span>提醒阈值</span>
+            <select
+              className="threshold-select"
+              value={threshold}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                setThreshold(v);
+                setThresholdState(v);
+              }}
+            >
+              {THRESHOLD_OPTIONS.map((v) => (
+                <option key={v} value={v}>
+                  {v}%
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </div>
 
@@ -233,7 +287,7 @@ export default function Dashboard() {
           <div className="card-grid overview-grid">
             {overviewAccounts.map((a) => (
               <div key={a.accountId} {...dragAccountProps(a.accountId)}>
-                <AccountCard account={a} now={now} progMode={progMode} onRetry={() => refreshAccount(a.accountId)} />
+                <AccountCard account={a} now={now} progMode={progMode} near={nearLimitIds.has(a.accountId)} onRetry={() => refreshAccount(a.accountId)} />
               </div>
             ))}
           </div>
@@ -261,7 +315,7 @@ export default function Dashboard() {
               {!collapsed[g.provider] && (
                 <div className="card-grid">
                   {g.list.map((a) => (
-                    <AccountCard key={a.accountId} account={a} now={now} progMode={progMode} onRetry={() => refreshAccount(a.accountId)} />
+                    <AccountCard key={a.accountId} account={a} now={now} progMode={progMode} near={nearLimitIds.has(a.accountId)} onRetry={() => refreshAccount(a.accountId)} />
                   ))}
                 </div>
               )}
@@ -386,13 +440,13 @@ function Overview({ accounts }) {
   );
 }
 
-function AccountCard({ account: a, now, progMode, onRetry }) {
+function AccountCard({ account: a, now, progMode, near, onRetry }) {
   const errKind = a.error ? ERROR_KINDS[a.error.kind] : null;
   // “进度/限额窗口”：有 used、有纯百分比，或带 total（限额）的窗口都走进度可视化（条形/圆环/嵌套环）。
   // 只有 balance 没有任何窗口的纯余额卡（如 sub2api 钱包）才用大数字。
   const hasProgress = (a.windows ?? []).some((w) => w.usedPercent != null || w.total != null);
   return (
-    <div className={`card account-card${a.error ? ' has-error' : ''}`} data-p={a.provider}>
+    <div className={`card account-card${a.error ? ' has-error' : ''}${near ? ' near-limit' : ''}`} data-p={a.provider}>
       <div className="card-head">
         <div className="card-title">
           <span className="p-icon" data-p={a.provider} aria-hidden="true">
@@ -404,6 +458,12 @@ function AccountCard({ account: a, now, progMode, onRetry }) {
           {a.source === 'live' ? 'live' : 'cache'}
         </span>
       </div>
+      {near && (
+        <div className="near-banner">
+          <span className="badge badge-red">即将打满</span>
+          <span className="muted small">有窗口用量已达阈值</span>
+        </div>
+      )}
       {a.plan && (
         <div className="card-sub tabular">
           <span className="plan-tag">{a.plan}</span>

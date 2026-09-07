@@ -48,6 +48,8 @@
   --toast-err-text: #ffb4b4;
   --toast-ok-bg: rgba(8, 32, 22, 0.88);
   --toast-ok-text: #9df0cd;
+  --toast-warn-bg: rgba(43, 28, 6, 0.88);
+  --toast-warn-text: #ffd28a;
   --balance-grad: linear-gradient(120deg, var(--green), #7ef0c4);
 }
 
@@ -87,6 +89,8 @@ html[data-theme='light'] {
   --toast-err-text: #b03030;
   --toast-ok-bg: rgba(236, 255, 247, 0.94);
   --toast-ok-text: #0b7a52;
+  --toast-warn-bg: rgba(255, 248, 231, 0.94);
+  --toast-warn-text: #8a5a08;
   --balance-grad: linear-gradient(120deg, #0f9d6c, #16b87e);
 }
 
@@ -890,6 +894,37 @@ html[data-theme='light'] [data-p='newapi'] { --p: #16a34a; }
 
 .account-card.has-error {
   border-color: color-mix(in srgb, var(--red) 30%, transparent);
+}
+
+/* 用量阈值提醒：卡片高亮 + 即将打满横幅 */
+.account-card.near-limit {
+  border-color: color-mix(in srgb, var(--red) 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--red) 30%, transparent),
+    0 0 14px color-mix(in srgb, var(--red) 18%, transparent);
+}
+.near-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 8px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--red) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--red) 28%, transparent);
+}
+
+/* 工具栏阈值选择器：继承全局 select 基础样式，只做紧凑化 */
+.threshold-ctl {
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.threshold-select {
+  min-height: 0;
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .card-head {
@@ -1948,6 +1983,12 @@ select option {
   color: var(--toast-ok-text);
   background: var(--toast-ok-bg);
   border-color: color-mix(in srgb, var(--green) 45%, transparent);
+}
+
+.toast-warn {
+  color: var(--toast-warn-text);
+  background: var(--toast-warn-bg);
+  border-color: color-mix(in srgb, var(--yellow) 45%, transparent);
 }
 
 @keyframes toast-in {

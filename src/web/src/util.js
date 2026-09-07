@@ -58,6 +58,71 @@ export function windowLevel(percent) {
   return 'ok';
 }
 
+// ---- 用量阈值提醒（纯前端） ----
+// 阈值：85/90/95，默认 90，存 localStorage（与主题/视图模式同机制）
+export const THRESHOLD_OPTIONS = [85, 90, 95];
+const THRESHOLD_KEY = 'qd-threshold';
+export function getThreshold() {
+  try {
+    const v = Number(localStorage.getItem(THRESHOLD_KEY));
+    return THRESHOLD_OPTIONS.includes(v) ? v : 90;
+  } catch {
+    return 90;
+  }
+}
+export function setThreshold(v) {
+  try {
+    localStorage.setItem(THRESHOLD_KEY, String(v));
+  } catch {}
+}
+
+// 一次性提醒已发记录：key = accountId|窗口名|resetAt，重置时间变化（新周期）即重新武装
+export function getAlertedSet() {
+  try {
+    const arr = JSON.parse(localStorage.getItem('qd-alerted') || '[]');
+    return Array.isArray(arr) ? new Set(arr.filter((x) => typeof x === 'string')) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+export function saveAlertedSet(set) {
+  try {
+    localStorage.setItem('qd-alerted', JSON.stringify([...set].slice(-400)));
+  } catch {}
+}
+
+// 一次性提醒判定（纯函数，便于测试）：
+// alerted = 已提醒过的 key 集合（key = `accountId|窗口名|resetAt`，新周期自动是新 key = 重新武装）
+// 规则：用量 ≥ 阈值且未提醒 → 提醒；用量 < 阈值-5（滞后区间）→ 移出已提醒（重新武装）；区间内保持现状
+export function evaluateAlerts(accounts, threshold, alerted) {
+  const now = Date.now();
+  const fire = [];
+  const rearm = [];
+  const seen = new Set();
+  for (const a of accounts ?? []) {
+    if (a.error) continue;
+    for (const w of a.windows ?? []) {
+      const p = w?.usedPercent;
+      if (p == null || !Number.isFinite(p)) continue;
+      const resetPart = w.resetAt != null ? String(w.resetAt) : 'none';
+      const key = `${a.accountId}|${w.name}|${resetPart}`;
+      seen.add(key);
+      if (p >= threshold) {
+        if (!alerted.has(key)) fire.push({ key, alias: a.alias, window: w.name, used: Math.round(p) });
+      } else if (p < threshold - 5 && alerted.has(key)) {
+        rearm.push(key);
+      }
+    }
+  }
+  // 清理已过期的旧周期 key（resetAt 已过 24h 以上的不再保留）
+  const stale = [];
+  for (const k of alerted) {
+    const ts = Number(k.split('|')[2]);
+    if (k.split('|')[2] !== 'none' && Number.isFinite(ts) && ts < now - 24 * 3600 * 1000 && !seen.has(k)) stale.push(k);
+  }
+  return { fire, rearm, stale };
+}
+
 // 主题：'light' | 'dark'，index.html 内联脚本已在首帧前设置 data-theme
 export function getTheme() {
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
