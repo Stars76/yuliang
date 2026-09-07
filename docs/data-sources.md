@@ -55,6 +55,13 @@
   - `mode=unrestricted` + 钱包：`balance` → 余额卡片（标注"钱包余额"）。
 - 该端点为官方预留的 CC Switch 集成接口，只读、不产生用量。
 
+## New API / One API 系（自建站）
+
+- **凭证**：站点地址（强制 https，仅环回允许 http）+ 用户 ID + 系统访问令牌（均在该站个人设置页生成/查看）。
+- **端点**：`GET {站点地址}/api/user/self`（`Authorization: Bearer <令牌>` + `New-Api-User: <用户 ID>`）。host 由凭证提供（`host:'*'` 通配项，仅 GET、路径精确等于 `/api/user/self`）。
+- **字段**：`{success:true, data:{username, quota, used_quota}}`；额度单位 500000 = 1 USD。`quota` → 余额总额，`used_quota` → 已用；`success=false` 按凭证过期处理。
+- **风险**：响应形态因 New API 分支/版本而异；结构不符时显示"上游变更"。
+
 ## Codex（直连 ChatGPT）
 
 - **凭证**：ChatGPT access token + account ID；与 `codex` 的 CPA management key 和账号选择流程完全独立。

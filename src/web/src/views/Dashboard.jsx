@@ -474,6 +474,7 @@ function AccountCard({ account: a, now, progMode, near, onRetry }) {
         <div className="card-error">
           <span className={`badge ${errKind?.cls || 'badge-red'}`}>{errKind?.label || '错误'}</span>
           <p className="error-reason">{a.error.message}</p>
+          {errKind?.hint && <p className="error-hint muted small">{errKind.hint}</p>}
           <button className="btn btn-ghost btn-sm" onClick={onRetry}>
             重试
           </button>

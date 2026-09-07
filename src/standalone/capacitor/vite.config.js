@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
@@ -27,10 +28,15 @@ function webShims() {
 }
 
 // Capacitor webDir 构建：入口本目录 index.html（capacitor-entry.jsx → 引擎直连）；base './' 供 WebView 相对加载。
+const appVersion = JSON.parse(readFileSync(fileURLToPath(new URL('../../../package.json', import.meta.url)), 'utf8')).version;
+
 export default defineConfig({
   root: here,
   base: './',
   plugins: [webShims(), react()],
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion),
+  },
   publicDir: fileURLToPath(new URL('../../web/public', import.meta.url)),
   build: {
     outDir: 'www',

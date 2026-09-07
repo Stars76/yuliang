@@ -52,7 +52,7 @@ src/
 └── ...
 ```
 
-安全模型与数据来源细节见 `CONTRACT.md`、`docs/data-sources.md`。
+安全模型与数据来源细节见 `CONTRACT.md`、`docs/data-sources.md`。基于 [MIT License](LICENSE) 开源。
 
 ## 更新日志
 

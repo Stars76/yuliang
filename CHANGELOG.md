@@ -8,6 +8,13 @@
 > - 语义：`MAJOR.MINOR.PATCH`。破坏性大改 → MAJOR；新增功能（如新平台/新组件）→ MINOR；修 bug/小改 → PATCH。
 > - 改完重新出包：`npm run dist:win`（Windows）、安卓见 `src/standalone/capacitor/README.md`。
 
+## 1.6.0 — 2026-09-07
+- **移除全部服务器端代码，聚焦单机双端**：删除多用户 HTTP 服务/信封加密 store/审计/CLI 与 Docker 部署配置；引擎（providers/**）迁入 `src/standalone/providers`，登录/审计/用户管理等前端死视图一并移除。双端（Windows/Android）功能与测试完整保留。
+- **用量阈值提醒**：仪表盘新增提醒阈值选择（85/90/95%）；窗口用量达阈值时卡片红框高亮 +「即将打满」横幅 + warn Toast 一次性提醒；同重置周期不重复打扰，回落阈值-5 以下自动重新武装。
+- **清理与工程化**：删除 `_zip_extract/` 重复分发副本；git 初始化与基线入库；新增 `npm run verify`（测试+双端构建）与 GitHub Actions 工作流；CSP 纵深加固（object-src/base-uri/form-action/frame-ancestors）、Electron 渲染进程沙箱化、引擎（engine.js）单测 9 用例。
+- **发布准备**：新增 MIT LICENSE；三处版本号对齐（根/capacitor/gradle）。
+- 版本 1.6.0（安卓 versionCode 14）。
+
 ## 1.5.7 — 2026-09-06
 - **移除圆环/嵌套环上残留的白色长条装饰**：彻底删除 `.ring-flow`（血管前锋白弧）与所有 `.ring-dot`/`.orbit-*`/`.ring-tip` 扫掠粒子等，只保留纯净的渐变彩弧 + 轨道。圆环不再出现“莫名其妙的白条”，也清除可能诱发安卓黑斑的全部叠加元素。
 - 版本 1.5.7（安卓 versionCode 13）。

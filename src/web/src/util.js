@@ -13,10 +13,10 @@ export const PROVIDER_LABELS = {
 };
 
 export const ERROR_KINDS = {
-  unavailable: { label: '不可用', cls: 'badge-red' },
-  auth_expired: { label: '凭证过期', cls: 'badge-red' },
-  rate_limited: { label: '被限流', cls: 'badge-yellow' },
-  upstream_changed: { label: '上游变更', cls: 'badge-yellow' },
+  unavailable: { label: '不可用', cls: 'badge-red', hint: '网络不通或上游暂时故障，可稍后重试' },
+  auth_expired: { label: '凭证过期', cls: 'badge-red', hint: '令牌已失效——到「凭证管理」更新 Key，或重新登录' },
+  rate_limited: { label: '被限流', cls: 'badge-yellow', hint: '请求太频繁，等几分钟再刷新' },
+  upstream_changed: { label: '上游变更', cls: 'badge-yellow', hint: '上游接口结构变化，等待应用更新适配' },
 };
 
 export function fmtCountdown(ms) {

@@ -3,6 +3,7 @@ import { getTheme, setTheme, isLite } from './util.js';
 import Dashboard from './views/Dashboard.jsx';
 import Credentials from './views/Credentials.jsx';
 import Widgets from './views/Widgets.jsx';
+import About from './views/About.jsx';
 
 const NAV = [
   { id: 'dashboard', label: '仪表盘' },
@@ -11,6 +12,7 @@ const NAV = [
 // 桌面小组件管理仅安卓（Capacitor）可用
 const mobile = typeof window !== 'undefined' && !!window.Capacitor;
 if (mobile) NAV.push({ id: 'widgets', label: '小组件' });
+NAV.push({ id: 'about', label: '关于' });
 
 export default function App() {
   const [view, setView] = useState('dashboard');
@@ -71,6 +73,7 @@ export default function App() {
         {view === 'dashboard' && <Dashboard />}
         {view === 'credentials' && <Credentials />}
         {view === 'widgets' && mobile && <Widgets />}
+        {view === 'about' && <About />}
       </main>
     </div>
   );

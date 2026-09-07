@@ -913,6 +913,75 @@ html[data-theme='light'] [data-p='newapi'] { --p: #16a34a; }
   border: 1px solid color-mix(in srgb, var(--red) 28%, transparent);
 }
 
+/* 错误卡建议提示 */
+.error-hint {
+  margin: 2px 0 8px;
+}
+
+/* 关于页 */
+.about-page {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.about-card {
+  padding: 18px 20px;
+}
+.about-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.about-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+}
+.about-title {
+  margin: 0;
+  font-size: 20px;
+}
+.about-desc {
+  margin: 0;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.about-h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+.about-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.about-providers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+.about-provider-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.about-license {
+  text-align: center;
+  margin: 4px 0 12px;
+}
+
 /* 工具栏阈值选择器：继承全局 select 基础样式，只做紧凑化 */
 .threshold-ctl {
   gap: 6px;
