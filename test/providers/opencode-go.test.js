@@ -1,8 +1,8 @@
 // opencode-go adapter 单测（fixture 内联脱敏，不联网）
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import adapter, { isZenEntitlement } from '../../src/server/providers/opencode-go.js';
-import { QuotaError } from '../../src/server/providers/http.js';
+import adapter, { isZenEntitlement } from '../../src/standalone/providers/opencode-go.js';
+import { QuotaError } from '../../src/standalone/providers/http.js';
 
 const ZEN_MESSAGE = '已识别为 OpenCode Zen；当前没有公开的 API Key 余额查询接口';
 

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import adapter, { parseResetAt, parseUsageSummary } from '../../src/server/providers/command-code.js';
-import { QuotaError } from '../../src/server/providers/http.js';
+import adapter, { parseResetAt, parseUsageSummary } from '../../src/standalone/providers/command-code.js';
+import { QuotaError } from '../../src/standalone/providers/http.js';
 
 const CREDITS = {
   plan_name: 'pro',

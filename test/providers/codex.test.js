@@ -7,8 +7,8 @@ import codex, {
   parseWhamUsage,
   extractCacheSnapshot,
   extractSignalsQuota,
-} from '../../src/server/providers/codex.js';
-import { QuotaError } from '../../src/server/providers/http.js';
+} from '../../src/standalone/providers/codex.js';
+import { QuotaError } from '../../src/standalone/providers/http.js';
 
 const WHAM = {
   plan_type: 'plus',

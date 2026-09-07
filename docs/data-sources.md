@@ -1,7 +1,7 @@
 # Provider 数据来源说明
 
 本文档说明面板中每个 provider 的额度数据来源、凭证类型、端点、刷新行为与用量影响。
-所有端点均为代码内固定白名单（`src/server/providers/*.js` 的 `allowed` 声明），面板不提供任何自定义请求代理。
+所有端点均为代码内固定白名单（`src/standalone/providers/*.js` 的 `allowed` 声明），面板不提供任何自定义请求代理。
 所有查询均为只读 GET（Codex 经 CPA 代发也是只读 GET），**不产生任何模型用量**。
 
 ## Codex / ChatGPT（经本机 CLIProxyAPI）

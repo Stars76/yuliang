@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import adapter, { parseResetAt, parseWhamUsage } from '../../src/server/providers/codex-direct.js';
-import { QuotaError } from '../../src/server/providers/http.js';
+import adapter, { parseResetAt, parseWhamUsage } from '../../src/standalone/providers/codex-direct.js';
+import { QuotaError } from '../../src/standalone/providers/http.js';
 
 const FIXTURE = {
   plan_type: 'plus',

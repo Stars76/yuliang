@@ -2,14 +2,14 @@
   "name": "quota-dashboard",
   "private": true,
   "type": "module",
-  "version": "1.5.7",
-  "description": "余量 · 单机离线额度面板",
+  "version": "1.6.0",
+  "description": "余量 · 单机离线额度面板（Windows / Android）",
   "main": "src/standalone/electron/main.js",
   "scripts": {
-    "start": "node src/server/index.js",
     "test": "node --test \"test/**/*.test.js\"",
-    "verify": "npm test && npm run build:web",
+    "verify": "npm test && npm run build:web && npm run build:android-web",
     "build:web": "npm --prefix src/web run build",
+    "build:android-web": "npm --prefix src/standalone/capacitor run build",
     "electron": "electron .",
     "dist:win": "electron-builder --win"
   },
@@ -24,8 +24,10 @@
       "output": "release"
     },
     "files": [
-      "src/server/providers/**/*",
       "src/standalone/**/*",
+      "!src/standalone/capacitor/node_modules/**",
+      "!src/standalone/capacitor/www/**",
+      "!src/standalone/capacitor/android/**",
       "src/web/dist/**/*",
       "package.json"
     ],

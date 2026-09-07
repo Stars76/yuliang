@@ -5,9 +5,8 @@ import http from 'node:http';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { executeAdapter, QuotaError } from '../src/server/providers/http.js';
-import { listProviderMeta, getAdapter } from '../src/server/providers/index.js';
-import { audit, redactValue } from '../src/server/store/index.js';
+import { executeAdapter, QuotaError } from '../src/standalone/providers/http.js';
+import { listProviderMeta, getAdapter } from '../src/standalone/providers/index.js';
 
 // 所有 adapter 允许命中的 host 全集（代码固定白名单）
 const ALLOWED_HOSTS = new Set([
@@ -162,22 +161,5 @@ test('真实 adapter：buildRequest 产物均能通过自身白名单', async ()
     );
     assert.ok(hit, `${id}: buildRequest 产物未命中自身白名单`);
     for (const bad of FORBIDDEN_PATHS) assert.ok(!url.pathname.includes(bad), `${id}: 命中模型用量路径`);
-  }
-});
-
-test('审计脱敏：凭证形态字符串不落盘', async () => {
-  const dir = await mkdtemp(join(tmpdir(), 'qd-audit-'));
-  try {
-    const secretKey = 'sk-abcdef1234567890abcdef1234567890';
-    const bearer = 'Bearer eyJhbGciOiJIUzI1NiJ9abcdef1234567890abcdef';
-    await audit(dir, 'credential_add', { provider: 'kimi', apiKey: secretKey, note: bearer });
-    const files = join(dir, `audit-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}.log`);
-    const content = await readFile(files, 'utf8');
-    assert.ok(!content.includes(secretKey), '密钥原文泄露');
-    assert.ok(!content.includes('eyJhbGciOiJIUzI1NiJ9'), 'token 原文泄露');
-    assert.ok(content.includes('[REDACTED]'), '未发生脱敏');
-    assert.equal(redactValue('plain ok'), 'plain ok');
-  } finally {
-    await rm(dir, { recursive: true, force: true });
   }
 });

@@ -15,10 +15,12 @@ jobs:
         with:
           node-version: 22
 
-      - name: 后端 + provider + 引擎测试
+      - name: 引擎 + provider 测试
         run: npm test
 
-      - name: 前端构建
+      - name: 前端构建（Electron 壳 + Android WebView）
         run: |
           npm ci --prefix src/web
           npm run build:web
+          npm ci --prefix src/standalone/capacitor
+          npm run build:android-web

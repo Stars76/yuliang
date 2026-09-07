@@ -9,14 +9,14 @@ const PROVIDERS_WEB = fileURLToPath(new URL('../providers.web.js', import.meta.u
 
 // WebView 打包时替换两处 Node-only 依赖：
 //  • discover.js → 空实现（依赖 node:fs）
-//  • server/providers/index.js → 静态注册表（避免运行时动态 import 在打包后解析不到哈希文件名）
+//  • standalone/providers/index.js → 静态注册表（避免运行时动态 import 在打包后解析不到哈希文件名）
 function webShims() {
   return {
     name: 'web-shims',
     enforce: 'pre',
     resolveId(source) {
       if (source.endsWith('discover.js')) return DISCOVER;
-      if (source.endsWith('server/providers/index.js')) return PROVIDERS_WEB;
+      if (source.endsWith('standalone/providers/index.js')) return PROVIDERS_WEB;
       return null;
     },
     load(id) {

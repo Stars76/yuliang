@@ -1,8 +1,8 @@
 // zai / bigmodel adapter 单测（fixture 内联脱敏，不联网）
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import zai, { bigmodel } from '../../src/server/providers/zhipu.js';
-import { QuotaError } from '../../src/server/providers/http.js';
+import zai, { bigmodel } from '../../src/standalone/providers/zhipu.js';
+import { QuotaError } from '../../src/standalone/providers/http.js';
 
 const FIXTURE = {
   code: 200,

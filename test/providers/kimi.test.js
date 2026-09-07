@@ -1,8 +1,8 @@
 // Kimi adapter 单测（fixture 内联脱敏，不联网）
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import kimi from '../../src/server/providers/kimi.js';
-import { QuotaError } from '../../src/server/providers/http.js';
+import kimi from '../../src/standalone/providers/kimi.js';
+import { QuotaError } from '../../src/standalone/providers/http.js';
 
 const FIXTURE = {
   limits: [

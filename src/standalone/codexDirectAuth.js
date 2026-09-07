@@ -1,7 +1,7 @@
 // Codex 直连 OAuth（device-code 流程，非标准 RFC8628）。环境无关：网络走全局 fetch
 // （Electron=Node，安卓=原生插件桥），凭证结构 {accessToken, refreshToken, expiresAt, accountId}。
 // 端点边界：仅 auth.openai.com（登录/续期）+ chatgpt.com/backend-api/wham/usage（只读额度）。
-import { QuotaError } from '../server/providers/http.js';
+import { QuotaError } from './providers/http.js';
 
 export const CLIENT_ID = 'app_EMoamEEZ73f0CkXaXp7hrann';
 export const USERCODE_URL = 'https://auth.openai.com/api/accounts/deviceauth/usercode';

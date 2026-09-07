@@ -1,8 +1,8 @@
 // deepseek adapter 单测（fixture 内联脱敏，不联网）
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import deepseek from '../../src/server/providers/deepseek.js';
-import { QuotaError } from '../../src/server/providers/http.js';
+import deepseek from '../../src/standalone/providers/deepseek.js';
+import { QuotaError } from '../../src/standalone/providers/http.js';
 
 const FIXTURE = {
   is_available: true,

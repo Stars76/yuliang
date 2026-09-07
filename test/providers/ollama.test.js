@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import adapter, { parseResetAt, parseUsage } from '../../src/server/providers/ollama.js';
-import { QuotaError } from '../../src/server/providers/http.js';
+import adapter, { parseResetAt, parseUsage } from '../../src/standalone/providers/ollama.js';
+import { QuotaError } from '../../src/standalone/providers/http.js';
 
 const FIXTURE = {
   plan_data: { type: 'pro' },

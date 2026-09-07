@@ -1,9 +1,9 @@
-// 单机引擎：复用 src/server/providers/**，去掉服务器/账户体系，暴露统一接口。
+// 单机引擎：providers/**（原 src/server/providers，已并入本目录），暴露统一接口。
 // 环境无关：只依赖注入的 store（凭证）与 env（cpaMgmtUrl）；取数走全局 fetch（Node/Electron 主进程或 Capacitor 注入的原生 fetch）。
-// 缓存 60s + 失败指数退避，逻辑搬自 server/http.js 的 fetchOne/collectQuota/quotaCache，去掉 username 作用域。
+// 缓存 60s + 失败指数退避，逻辑源自原服务器版的 fetchOne/collectQuota/quotaCache，去掉 username 作用域。
 // discover 依赖 node:fs，仅在 Node 侧动态加载，不拉入 WebView 包。
-import { getAdapter, listProviderMeta } from '../server/providers/index.js';
-import { executeAdapter, QuotaError } from '../server/providers/http.js';
+import { getAdapter, listProviderMeta } from './providers/index.js';
+import { executeAdapter, QuotaError } from './providers/http.js';
 import { setCpaMgmtUrl } from './env.js';
 import {
   requestDeviceCode,

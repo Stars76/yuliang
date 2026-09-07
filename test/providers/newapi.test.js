@@ -1,8 +1,8 @@
 // newapi adapter 单测（fixture 内联脱敏，不联网）
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import newapi, { parseInstanceUrl, QUOTA_PER_USD } from '../../src/server/providers/newapi.js';
-import { QuotaError } from '../../src/server/providers/http.js';
+import newapi, { parseInstanceUrl, QUOTA_PER_USD } from '../../src/standalone/providers/newapi.js';
+import { QuotaError } from '../../src/standalone/providers/http.js';
 
 const FIXTURE = {
   success: true,

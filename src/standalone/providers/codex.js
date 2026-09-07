@@ -2,7 +2,7 @@
 // 走本机 CPA 管理口（白名单 http 特例），绝不调用 /v0/management/usage-queue
 // 默认 http://127.0.0.1:8317；容器部署用 CPA_MGMT_URL 指向 docker 网关（compose 已配）
 import { QuotaError } from './http.js';
-import { env } from '../../standalone/env.js';
+import { env } from '../env.js';
 
 const MGMT = (env.cpaMgmtUrl || 'http://127.0.0.1:8317').replace(/\/+$/, '');
 const MGMT_HOST = new URL(MGMT).host;

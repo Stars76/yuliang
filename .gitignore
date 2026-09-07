@@ -3,14 +3,14 @@ node_modules/
 
 # 构建产物
 src/web/dist/
+src/standalone/capacitor/www/
 release/
 release-android/
 
-# 运行时数据（含加密 store 与审计日志，绝不入库）
+# 运行时数据（单机版凭证存储，绝不入库）
 data/
 
 # 环境与本地状态
-.deploy-state/
 .env
 .env.*
 

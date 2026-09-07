@@ -1,7 +1,7 @@
 // sub2api adapter 单测（fixture 按 gateway_handler.go 的 Usage() 响应契约构造，不联网）
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import sub2api, { parseUsage, parseInstanceUrl } from '../../src/server/providers/sub2api.js';
+import sub2api, { parseUsage, parseInstanceUrl } from '../../src/standalone/providers/sub2api.js';
 
 const QUOTA_LIMITED = {
   mode: 'quota_limited',
