@@ -1,0 +1,45 @@
+{
+  "name": "quota-dashboard",
+  "private": true,
+  "type": "module",
+  "version": "1.5.7",
+  "description": "余量 · 单机离线额度面板",
+  "main": "src/standalone/electron/main.js",
+  "scripts": {
+    "start": "node src/server/index.js",
+    "test": "node --test \"test/**/*.test.js\"",
+    "verify": "npm test && npm run build:web",
+    "build:web": "npm --prefix src/web run build",
+    "electron": "electron .",
+    "dist:win": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.yuliang.app",
+    "productName": "余量",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/server/providers/**/*",
+      "src/standalone/**/*",
+      "src/web/dist/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "src/standalone/electron/main.js"
+    },
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "src/standalone/electron/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

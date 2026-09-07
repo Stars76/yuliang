@@ -1,0 +1,78 @@
+# 更新日志（余量 / Yuliang）
+
+> **版本约定（每次改动务必执行）**
+> - 任何功能新增 / 缺陷修复 / 行为变更，都要递增版本号，不能只改代码不改版本。
+> - 三处同步：根 `package.json` 的 `version`、`src/standalone/capacitor/package.json` 的 `version`、
+>   `src/standalone/capacitor/android/app/build.gradle` 的 `versionName`。
+> - 安卓 `versionCode`（build.gradle）**每次出可安装包都 +1**（否则系统拒绝覆盖安装）。
+> - 语义：`MAJOR.MINOR.PATCH`。破坏性大改 → MAJOR；新增功能（如新平台/新组件）→ MINOR；修 bug/小改 → PATCH。
+> - 改完重新出包：`npm run dist:win`（Windows）、安卓见 `src/standalone/capacitor/README.md`。
+
+## 1.5.7 — 2026-09-06
+- **移除圆环/嵌套环上残留的白色长条装饰**：彻底删除 `.ring-flow`（血管前锋白弧）与所有 `.ring-dot`/`.orbit-*`/`.ring-tip` 扫掠粒子等，只保留纯净的渐变彩弧 + 轨道。圆环不再出现“莫名其妙的白条”，也清除可能诱发安卓黑斑的全部叠加元素。
+- 版本 1.5.7（安卓 versionCode 13）。
+
+## 1.5.6 — 2026-09-06
+- **圆环流动修正**：亮液前锋改为在「已填充的彩色弧段」内来回摆动（不再绕整圈空转）；去掉圆环填充弧的外发光/投影（`.ring-ok/warn/danger` 的 drop-shadow 已移除），特效只存在于环内，圆环外部不再有任何发光残留。
+- 版本 1.5.6（安卓 versionCode 12）。
+
+## 1.5.5 — 2026-09-06
+- **圆环 / 嵌套环加“血管式”流动前锋**：在已填充弧上叠一条亮液段（`.ring-flow`），绕环循环转动 —— 与 1.5.4 进度条同一套纯 `transform: rotate` + 描边 dash 的做法，无 filter/无渐变叠加，安卓上丝滑且不产生黑斑；重置到点自动加速。
+- 版本 1.5.5（安卓 versionCode 11）。
+
+## 1.5.4 — 2026-09-06
+- **进度条改为“血管式”丝滑流动**：去掉老的斜条纹 + 柔光团 + 白色粒子叠加。改用两层纯 `linear-gradient` 在管内循环平移 —— ① 一缕亮液高光流过（深浅制造纵深感）、② 细密“血细胞”鼓包沿管前进；只动 `background-position`，无 filter/无径向渐变叠加，安卓 WebView 合成开销最低、最丝滑且不会再出黑点黑斑。重置到点时流速自动加快。
+- 版本 1.5.4（安卓 versionCode 10）。
+
+## 1.5.3 — 2026-09-06
+- **移除进度条/圆环的全部白色装饰粒子**（`.p-dot`/`.p-head`/`ring-dot`/`ring-tip`/`orbit-sat` 等）：仅保留干净的流动渐变弧/条，避免任何黑点黑斑并更清爽。圆环组件同步精简（RingLayers 不再画卫星/粒子/端点光珠）。
+- 版本 1.5.3（安卓 versionCode 9）。
+
+## 1.5.2 — 2026-09-06
+- **修复进度条/圆环黑点黑斑**：安卓 WebView 中，白色粒子/光珠的 `drop-shadow` + 半透明径向渐变在叠加 CSS 渐变动画合成时会渲染成暗点。改为实心纯色小圆点（`.p-dot`/`.ring-dot`/`.ring-tip`/`.orbit-*` 去滤镜与渐变光晕），仍保留流动/脉冲动效但不再有暗晕。
+- 版本 1.5.2（安卓 versionCode 8）。
+
+## 1.5.1 — 2026-09-06
+- **手机端动效放开**：移除 `.lite` 对圆环/进度条动画的屏蔽，安卓与桌面端一致（流动渐变、弧上粒子、端点光珠、条形纹理/彗星头全部可用）；仍保留毛玻璃/固定背景等性能相关项关闭。
+- **桌面小组件添加兜底**：`requestAdd` 现在返回精确状态 —— `pin-ok`（系统已受理）/ `picker`（已打开系统小组件选择器）/ `manual`（引导长按桌面 → 小组件 → 余量 手动添加）；`requestPinAppWidget` 抛异常/被拒时不再静默，降级打开系统选择器或给出引导文案；被拒时先落 PendingWidgetConfig，手动添加也能用上你选的账号/样式/尺寸。
+- 版本 1.5.1（安卓 versionCode 7）。
+
+## 1.5.0 — 2026-09-05
+- **额度显示语义改为「剩余」**：进度条/圆环/嵌套环统一显示剩余百分比（`100 − 已用`，从满额随用量递减）；纯余额卡加「可用余额」标注；带总额窗口改为「限额 $14 · 已用 $5.29/…」并保留总量。
+- **长周期窗口显示具体重置日期**：每周/每月（≥1 天）窗口在倒计时旁补「M月D日 HH:MM」。
+- **Command Code 引擎对齐**：解析 credits 顶层 `windowLimits` 的 5 小时/每周实时窗口（used+cap+resetAt）；套餐 id 映射短名（`individual-goat`→GOAT 等）；GOAT 套餐按官方限额 $14/$35/$70 硬编码总额并从剩余反推已用（不伪造无分母的百分比）；金额四舍五入到两位。
+- **仪表盘「分组 / 总览」双视图**：可切换；总览为无分组紧凑网格；分组视图每个来源可折叠/展开。
+- **拖拽排序**：分组模式下拖拽分组头调整来源先后；总览模式下拖拽卡片调整账号顺序，均 localStorage 记忆。
+- **窗口有 total 也走进度可视化**：只给总量（无 used/usedPercent）的窗口不再当纯文本行，而按限额绘制。
+- 版本 1.5.0（安卓 versionCode 6）。
+
+## 1.4.0 — 2026-09-05
+- **Codex（直连）支持 OAuth 设备码登录**：App 内点「登录 Codex」→ 申请设备码 → 浏览器打开验证页输码 → 自动换 token 并写入凭证；含 refreshToken 自动续期（临近过期 5 分钟预刷新并写回存储）。兼容旧手填 token（无 refreshToken 时不续期）。Electron 走 loopback 新路由 `/api/codex-direct/login[/status]`，安卓直接调引擎；验证页经系统浏览器打开（新增 `openExternal`：Electron shell / Android Intent）。
+- **小组件 Command Code 显示**：带额度总量的窗口显示「月限额 10 USD · 剩 82%」，不再只有百分数。
+- 版本 1.4.0（安卓 versionCode 5）。
+
+## 1.3.0 — 2026-09-05
+- **桌面小组件大一统重构**：12 个「尺寸×样式」写死预设 → 6 个尺寸族（1×1/2×1/2×2/3×2/4×2 滚动/4×4 滚动），样式/账号/主题改为**按每个小组件实例保存的配置**渲染。
+- **消灭闪退**：全链路 try/catch；单行渲染失败自动降级为纯文本行；余额账号强制数字显示；quota 可选 圆环/嵌套圆环/进度条/纯数字（嵌套环画成位图）。任意账号组合任意尺寸都不再崩。
+- **App 内「小组件」页**（安卓新增导航）：勾选账号 → 每个 quota 账号选样式 → 按账号数自动给「最小~最大」尺寸范围 → 一键「添加到桌面」（`requestPinAppWidget`，API≥26 弹系统放置框；22-25 打开选择器）。
+- **浅色主题**：小组件默认浅色系（`#F3F6FF` 底 + 深字 + 靛蓝 accent，对齐 App 浅色主题），可跟随 App 深/浅主题（`QuotaWidgetPlugin.setTheme`）。
+- 版本 1.3.0（安卓 versionCode 4）。
+
+## 1.2.0 — 2026-09-05
+- **修复安卓所有 provider 报 network error**：`@capacitor-community/http@1.4.1` 是 Capacitor 3 时代的插件，在 Cap6 下原生桥失效。移除之，改为自写原生插件 `NativeHttpPlugin`（`HttpURLConnection`，后台线程、主线程回调），`fetchShim.js` 改走该插件。已在 Windows 实测 opencode.ai/deepseek 可达（401 为未带 key 的正常表现）。
+- **安卓流畅度**：新增 `.lite` 流畅模式（Capacitor 下自动启用）——去掉 `body{background-attachment:fixed}`（滚动逐帧重绘）、顶栏/弹层 `backdrop-filter` 毛玻璃、全部持续型装饰动画，并跳过圆环 SMIL 渐变旋转与轨道粒子（CSS 无法停 SMIL，组件内门控）。
+- 版本 1.2.0（安卓 versionCode 3）。
+
+## 1.1.0 — 2026-09-05
+- 安卓 WebView provider 注册修复：新增 `providers.web.js` 静态导入，解决「添加凭证」白屏（运行时动态 import 在打包后解析不到哈希 chunk）。
+- 安卓状态栏修复：`@capacitor/status-bar` 按主题设色，消除顶部灰条。
+- 新增 `ErrorBoundary`：渲染异常显示错误信息而非整屏白屏。
+- 安卓桌面小组件：12 个预设（1×1~4×4 × 进度条/圆环/纯数字 × 固定/滚动）。
+- 密钥输入框可粘贴：`type=text` + CSS 遮罩 + 显示/隐藏切换。
+- CPA(codex) 在安卓可用：凭证新增「管理地址 baseUrl」手填项；`codex.js` 支持每凭证 baseUrl（服务器行为不变）。
+- 版本号升至 1.1.0（安卓 versionCode 2）。
+
+## 1.0.0 — 初始单机离线版
+- 共享引擎 + Electron(Windows) + Capacitor(Android) 双壳，复用现有 provider，无账户体系。
+- 仪表盘 / 凭证管理 / 自动发现本机配置 / 主题 / 进度模式 / 60s 缓存+退避。
+- 凭证 safeStorage(Windows)/Preferences(Android) 本地加密存储，不连任何服务器。

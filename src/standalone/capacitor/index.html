@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('qd-theme'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <title>余量 · 额度面板</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./capacitor-entry.jsx"></script>
+  </body>
+</html>

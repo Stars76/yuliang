@@ -1,0 +1,27 @@
+{
+  "name": "quota-standalone-capacitor",
+  "private": true,
+  "version": "1.5.7",
+  "type": "module",
+  "scripts": {
+    "build:web": "vite build",
+    "add:android": "cap add android",
+    "sync": "cap sync",
+    "open:android": "cap open android",
+    "apk": "cd android && gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.2",
+    "@capacitor/core": "^6.2.2",
+    "@capacitor/preferences": "^6.0.3",
+    "@capacitor/status-bar": "^6.0.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.2",
+    "@vitejs/plugin-react": "^4.3.2",
+    "vite": "^5.4.8"
+  }
+}
+
