@@ -154,8 +154,9 @@ html[data-theme='light'] body {
   font-variant-numeric: tabular-nums;
 }
 
+/* 无障碍：辅助文本色提亮一档，正文场景对比度 ≥4.5:1（深浅主题均校准） */
 .muted {
-  color: var(--text-muted);
+  color: var(--text-2);
 }
 
 .small {

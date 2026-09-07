@@ -6,14 +6,14 @@
 
 ## Codex / ChatGPT（经本机 CLIProxyAPI）
 
-- **凭证**：CLIProxyAPI 的 management key（`remote-management.secret-key` 明文），面板信封加密保存，仅用于访问 CPA 管理口（默认 `http://127.0.0.1:8317`；容器部署经 `CPA_MGMT_URL=http://host.docker.internal:8317` 走 docker 网关，均不出宿主机）。
+- **凭证**：CLIProxyAPI 的 management key（`remote-management.secret-key` 明文），凭证在设备端加密保存（钥匙串/安全存储），仅用于访问 CPA 管理口（默认 `http://127.0.0.1:8317`，可在表单手填本机/局域网地址）。
 - **账号枚举**：`GET /v0/management/auth-files`（只读），按 `auth_index` 引用账号，邮箱默认脱敏。
 - **额度取数三级回退**（`fetchCodexQuota`）：
   1. **实时**：`POST /v0/management/api-call` 以 `auth_index` + `Bearer $TOKEN$` 占位代发 `GET https://chatgpt.com/backend-api/wham/usage`（UA 伪装 `codex_cli_rs/...`）。⚠️ 2026-09-03 实测该上游端点对全部账号返回 404（疑似上游变更），链路保留以便上游恢复后自动生效。
   2. **插件快照**：`GET /v0/management/plugins/cpa-account-config-manager/accounts`，取 `usage.codex.{five_hour, seven_day}`（`used_percent`、`reset_at`、`window_minutes`）。由插件的被动信号驱动，近期有真实流量的账号数据为当天新鲜。卡片标注 `cache`。
   3. **auth-files 被动信号**：`quota.signals` 中的 `X-Codex-Primary/Secondary-Used-Percent/-Window-Minutes/-Reset-At` 响应头信号（来自真实模型响应头，权威但仅当账号近期有流量）。卡片标注 `cache`。
   4. 三者皆失败 → 显示"不可用"，绝不伪造额度。
-- **面板绝不调用** `/v0/management/usage-queue`（单消费者队列，CPA-Manager-Plus 在消费）。
+- **绝不调用** `/v0/management/usage-queue`（单消费者队列，CPA-Manager-Plus 在消费）。
 
 ## OpenCode（自动识别 Go / Zen）
 

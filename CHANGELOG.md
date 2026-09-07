@@ -8,6 +8,13 @@
 > - 语义：`MAJOR.MINOR.PATCH`。破坏性大改 → MAJOR；新增功能（如新平台/新组件）→ MINOR；修 bug/小改 → PATCH。
 > - 改完重新出包：`npm run dist:win`（Windows）、安卓见 `src/standalone/capacitor/README.md`。
 
+## 1.7.0 — 2026-09-07
+- **新增 OpenRouter provider**：`GET /api/v1/credits`（官方端点）→ 余额 = 购入额度 − 已用；附完整解析单测与安全白名单用例。现支持 12 个 provider。
+- **小组件 ↻ 刷新按钮（Android）**：全部 6 个尺寸的小组件新增刷新按钮，点击打开 App 并自动刷新一轮额度（PendingIntent 携带 widget_refresh 标记，前端桥读取后触发）。
+- **无障碍打磨**：额度卡/分组/账号列表补全 role 与 aria-label（含折叠按钮、即将打满状态）；辅助文本色 `.muted` 提亮一档，正文对比度达标。
+- **README 下载安装章节**：双端安装步骤与 SmartScreen / 未知来源提示（渠道链接待填）。
+- 版本 1.7.0（安卓 versionCode 15）。
+
 ## 1.6.0 — 2026-09-07
 - **移除全部服务器端代码，聚焦单机双端**：删除多用户 HTTP 服务/信封加密 store/审计/CLI 与 Docker 部署配置；引擎（providers/**）迁入 `src/standalone/providers`，登录/审计/用户管理等前端死视图一并移除。双端（Windows/Android）功能与测试完整保留。
 - **用量阈值提醒**：仪表盘新增提醒阈值选择（85/90/95%）；窗口用量达阈值时卡片红框高亮 +「即将打满」横幅 + warn Toast 一次性提醒；同重置周期不重复打扰，回落阈值-5 以下自动重新武装。

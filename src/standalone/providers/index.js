@@ -10,6 +10,7 @@ const ADAPTER_FILES = [
   'kimi.js',
   'zhipu.js',
   'deepseek.js',
+  'openrouter.js',
   'sub2api.js',
   'newapi.js',
 ];

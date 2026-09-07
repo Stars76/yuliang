@@ -1,5 +1,6 @@
 package com.yuliang.app;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
@@ -16,6 +17,7 @@ import org.json.JSONObject;
  *  - 6 个尺寸族 = 6 个子类（cell 尺寸不同、单/多/滚动不同），只负责布局形态；
  *  - 内容全部由「实例配置」(WidgetData.readConfig) 决定：选哪些账号、每账号样式、主题。
  *  - 全链路 try/catch，任何一步失败都只影响单次刷新，绝不闪退。
+ *  - ↻ 按钮：打开 App 并带 refresh=1 标记，前端桥读到即自动刷新一轮额度。
  */
 public abstract class BaseQuotaWidget extends AppWidgetProvider {
 
@@ -24,6 +26,21 @@ public abstract class BaseQuotaWidget extends AppWidgetProvider {
     /** 4x2/4x4 内部滚动 */
     protected boolean scroll() { return false; }
     protected int singleRingDp() { return 60; }
+
+    /** 刷新按钮 → 打开 App（extras: widget_refresh=1），由 JS 桥触发自动刷新 */
+    static void bindRefresh(Context ctx, RemoteViews v, int... viewIds) {
+        try {
+            Intent intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
+            if (intent == null) return;
+            intent.putExtra("widget_refresh", true);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent pi = PendingIntent.getActivity(
+                    ctx, 0, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            for (int id : viewIds) v.setOnClickPendingIntent(id, pi);
+        } catch (Throwable ignored) {
+        }
+    }
 
     @Override
     public void onUpdate(Context ctx, AppWidgetManager mgr, int[] ids) {
@@ -110,6 +127,7 @@ public abstract class BaseQuotaWidget extends AppWidgetProvider {
                 v.setTextColor(R.id.single_number, p.text);
             }
         }
+        bindRefresh(ctx, v, R.id.widget_refresh);
         mgr.updateAppWidget(widgetId, v);
     }
 
@@ -137,6 +155,7 @@ public abstract class BaseQuotaWidget extends AppWidgetProvider {
                 }
             }
         }
+        bindRefresh(ctx, v, R.id.widget_refresh);
         mgr.updateAppWidget(widgetId, v);
     }
 
@@ -153,6 +172,7 @@ public abstract class BaseQuotaWidget extends AppWidgetProvider {
         svc.setData(Uri.parse(svc.toUri(0))); // 每实例独立适配器
         v.setEmptyView(R.id.widget_list, R.id.widget_empty);
         v.setRemoteAdapter(R.id.widget_list, svc);
+        bindRefresh(ctx, v, R.id.widget_refresh);
         mgr.updateAppWidget(widgetId, v);
         mgr.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_list);
     }

@@ -193,6 +193,8 @@ export default function Dashboard() {
 
   const dragGroupProps = (provider) => ({
     draggable: true,
+    role: 'listitem',
+    'aria-label': `分组 ${PROVIDER_LABELS[provider] || provider}，可拖拽调整顺序`,
     onDragStart: (e) => { dragProviderRef.current = provider; e.dataTransfer.effectAllowed = 'move'; },
     onDragOver: (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; },
     onDrop: (e) => { e.preventDefault(); if (dragProviderRef.current && dragProviderRef.current !== provider) reorderGroups(dragProviderRef.current, provider); dragProviderRef.current = null; },
@@ -201,6 +203,8 @@ export default function Dashboard() {
 
   const dragAccountProps = (id) => ({
     draggable: true,
+    role: 'listitem',
+    'aria-label': '账号卡片，可拖拽调整顺序',
     onDragStart: (e) => { dragAccountRef.current = id; e.dataTransfer.effectAllowed = 'move'; },
     onDragOver: (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; },
     onDrop: (e) => { e.preventDefault(); if (dragAccountRef.current && dragAccountRef.current !== id) reorderAccounts(dragAccountRef.current, id); dragAccountRef.current = null; },
@@ -284,7 +288,7 @@ export default function Dashboard() {
       ) : viewMode === 'overview' ? (
         <>
           <Overview accounts={accounts} />
-          <div className="card-grid overview-grid">
+          <div className="card-grid overview-grid" role="list" aria-label="账号列表">
             {overviewAccounts.map((a) => (
               <div key={a.accountId} {...dragAccountProps(a.accountId)}>
                 <AccountCard account={a} now={now} progMode={progMode} near={nearLimitIds.has(a.accountId)} onRetry={() => refreshAccount(a.accountId)} />
@@ -301,6 +305,7 @@ export default function Dashboard() {
                 <button
                   className={`group-toggle${collapsed[g.provider] ? ' closed' : ''}`}
                   aria-expanded={!collapsed[g.provider]}
+                  aria-label={`${collapsed[g.provider] ? '展开' : '折叠'} ${PROVIDER_LABELS[g.provider] || g.provider} 分组`}
                   onClick={() => setCollapsed((s) => ({ ...s, [g.provider]: !s[g.provider] }))}
                 >
                   <i className="chev" aria-hidden="true" />
@@ -313,7 +318,7 @@ export default function Dashboard() {
                 <span className="group-line" aria-hidden="true" />
               </div>
               {!collapsed[g.provider] && (
-                <div className="card-grid">
+                <div className="card-grid" role="list" aria-label={`${PROVIDER_LABELS[g.provider] || g.provider} 账号`}>
                   {g.list.map((a) => (
                     <AccountCard key={a.accountId} account={a} now={now} progMode={progMode} near={nearLimitIds.has(a.accountId)} onRetry={() => refreshAccount(a.accountId)} />
                   ))}
@@ -446,7 +451,12 @@ function AccountCard({ account: a, now, progMode, near, onRetry }) {
   // 只有 balance 没有任何窗口的纯余额卡（如 sub2api 钱包）才用大数字。
   const hasProgress = (a.windows ?? []).some((w) => w.usedPercent != null || w.total != null);
   return (
-    <div className={`card account-card${a.error ? ' has-error' : ''}${near ? ' near-limit' : ''}`} data-p={a.provider}>
+    <div
+      className={`card account-card${a.error ? ' has-error' : ''}${near ? ' near-limit' : ''}`}
+      data-p={a.provider}
+      role="listitem"
+      aria-label={`${a.alias}${a.error ? `，错误：${errKind?.label ?? '异常'}` : near ? '，即将打满' : ''}`}
+    >
       <div className="card-head">
         <div className="card-title">
           <span className="p-icon" data-p={a.provider} aria-hidden="true">
@@ -459,7 +469,7 @@ function AccountCard({ account: a, now, progMode, near, onRetry }) {
         </span>
       </div>
       {near && (
-        <div className="near-banner">
+        <div className="near-banner" role="status">
           <span className="badge badge-red">即将打满</span>
           <span className="muted small">有窗口用量已达阈值</span>
         </div>

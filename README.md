@@ -4,6 +4,22 @@
 
 > 支持 **Windows（Electron）** 与 **Android（Capacitor）**，两端共用同一份引擎与前端。
 
+## 下载安装
+
+<!-- TODO: 发布后把下面的占位链接换成实际地址（GitHub Releases / 网盘 / 蓝奏云均可） -->
+
+**Windows**（10/11 x64）
+1. 下载安装包 `余量 Setup <版本>.exe`（链接：*待填*）
+2. 双击安装。首次运行若出现 SmartScreen 蓝色警告：点「更多信息」→「仍要运行」（应用未购买代码签名证书，属正常提示）
+3. 到「凭证管理」添加第一个账号即可
+
+**Android**（8.0+）
+1. 下载 APK `yuliang-<版本>.apk`（链接：*待填*）
+2. 安装时允许「来自此来源的应用」（设置 → 安全 → 安装未知应用）
+3. 添加账号后可在「小组件」页把额度卡片加到桌面；小组件右上角 ↻ 可刷新并打开 App
+
+> 桌面小组件为 Android 专属；Windows 端支持自动发现本机 Codex / OpenCode 配置。
+
 ## 核心特性
 
 - **数据不出本机**：凭证存 OS 钥匙串（Windows Credential Manager / Android Keystore），流量只去各官方只读端点
@@ -25,6 +41,7 @@
 | Ollama Cloud | 额度 | 会话/周/月窗口 |
 | Command Code | 额度 | credits + 用量窗口 |
 | DeepSeek | 余额 | 按量余额（官方端点） |
+| OpenRouter | 余额 | 官方 credits 端点（购入-已用） |
 | sub2api / newapi | 额度/余额 | 自建中转实例 |
 
 ## 本地开发

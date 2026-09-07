@@ -36,4 +36,16 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textSize="11sp" />
+
+    <TextView
+        android:id="@+id/widget_refresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="4dp"
+        android:layout_marginTop="2dp"
+        android:text="↻"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:contentDescription="刷新并打开应用" />
 </LinearLayout>

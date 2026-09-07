@@ -9,11 +9,12 @@ import opencodeGo from './providers/opencode-go.js';
 import kimi from './providers/kimi.js';
 import zai, { bigmodel } from './providers/zhipu.js';
 import deepseek from './providers/deepseek.js';
+import openrouter from './providers/openrouter.js';
 import sub2api from './providers/sub2api.js';
 import newapi from './providers/newapi.js';
 
 const registry = new Map();
-for (const a of [codex, codexDirect, ollama, commandCode, opencodeGo, kimi, zai, bigmodel, deepseek, sub2api, newapi]) {
+for (const a of [codex, codexDirect, ollama, commandCode, opencodeGo, kimi, zai, bigmodel, deepseek, openrouter, sub2api, newapi]) {
   if (a && typeof a.id === 'string') registry.set(a.id, a);
 }
 

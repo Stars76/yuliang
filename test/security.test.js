@@ -20,6 +20,7 @@ const ALLOWED_HOSTS = new Set([
   'open.bigmodel.cn',
   'opencode.ai',
   'api.deepseek.com',
+  'openrouter.ai',
 ]);
 // 会产生模型用量的路径特征，任何 adapter 不得声明
 const FORBIDDEN_PATHS = [
@@ -144,6 +145,7 @@ test('真实 adapter：buildRequest 产物均能通过自身白名单', async ()
     'bigmodel',
     'opencode-go',
     'deepseek',
+    'openrouter',
     'codex',
     'codex-direct',
     'ollama',

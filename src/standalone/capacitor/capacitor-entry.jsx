@@ -28,7 +28,7 @@ async function setupStatusBar() {
 }
 
 bootstrapQuotaEngine()
-  .then(() => {
+  .then(async (engine) => {
     el.replaceChildren();
     ReactDOM.createRoot(el).render(
       <ErrorBoundary>
@@ -38,6 +38,14 @@ bootstrapQuotaEngine()
       </ErrorBoundary>,
     );
     setupStatusBar();
+    // 小组件 ↻ 按钮：launch intent 携带 widget_refresh=1 → 打开 App 即自动刷新一轮额度。
+    // Android 上 Capacitor 会把 intent extras 合入 window.launchExtras（新版桥）；读不到就静默跳过。
+    try {
+      const extras = globalThis.window?.launchExtras ?? null;
+      if (extras && (extras.widget_refresh === true || extras.widget_refresh === 'true')) {
+        setTimeout(() => engine.refreshQuota().catch(() => {}), 600);
+      }
+    } catch {}
   })
   .catch((e) => {
     el.replaceChildren();

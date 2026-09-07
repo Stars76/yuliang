@@ -8,6 +8,7 @@ export const PROVIDER_LABELS = {
   zai: 'Z.AI',
   bigmodel: '智谱 BigModel',
   deepseek: 'DeepSeek',
+  openrouter: 'OpenRouter',
   sub2api: 'sub2api',
   newapi: 'New API',
 };
