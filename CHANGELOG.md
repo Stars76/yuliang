@@ -9,6 +9,7 @@
 > - 改完重新出包：`npm run dist:win`（Windows）、安卓见 `src/standalone/capacitor/README.md`。
 
 ## 1.7.1 — 2026-09-07
+- **安卓发布构建切换**：`npm run apk` 改为出 release 构建（minify + shrinkResources，体积 4.2MB→1.8MB，-57%，且不带 debuggable 标志）；产物命名去掉 debug——`release-android/yuliang-<版本>.apk` + 固定名 `yuliang.apk`。无正式证书期间以 debug 密钥签 release 包（可安装、不可调试），升级仍需卸载重装；拿到 keystore 后删 gradle 里 signingConfig 一行即切正式签名。
 - **安卓凭证真加密**：新增 SecureCodec 插件（Android Keystore AES-256-GCM，密钥不可导出、卸载即销毁），capacitorStore 接入后凭证落盘为密文；存量明文自动平滑迁移，解密失败如实降级。附 5 个加密链路单测。
 - **加固**：`allowBackup="false"`（阻断系统备份/adb 提取凭证）；Electron loopback 服务加 Host 白名单校验（防 DNS rebinding）；小组件 ↻ 按钮补主题色（修复深色主题下不可见）。
 - **清理**：Capacitor 构建剔除 Web 专属 sw.js/manifest 死文件；vite dev proxy 移除指向已删服务器的残留配置。

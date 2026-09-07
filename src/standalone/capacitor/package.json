@@ -8,7 +8,7 @@
     "add:android": "cap add android",
     "sync": "cap sync",
     "open:android": "cap open android",
-    "apk": "cd android && gradlew assembleDebug && node scripts/copy-apk.mjs"
+    "apk": "cd android && gradlew assembleRelease && node scripts/copy-apk.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.2",

@@ -18,8 +18,12 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // 无发布证书时的折中：release 构建用 debug 密钥签名（否则 assembleRelease 出 unsigned 包无法安装）。
+            // 拿到正式 keystore 后删除 signingConfig 这行即可切回正式签名。
+            signingConfig signingConfigs.debug
         }
     }
 }
