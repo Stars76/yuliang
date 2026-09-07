@@ -11,15 +11,16 @@ const PROVIDERS_WEB = fileURLToPath(new URL('../providers.web.js', import.meta.u
 
 // WebView 打包时替换两处 Node-only 依赖：
 //  • discover.js → 空实现（依赖 node:fs）
-//  • standalone/providers/index.js → 静态注册表（避免运行时动态 import 在打包后解析不到哈希文件名）
-// 另剔除 public 里 Web 专属的 sw.js/manifest（Capacitor 壳不注册 SW，留着是死文件）。
+//  • providers/index.js → 静态注册表（动态 import 在打包后的 WebView 里解析不到哈希文件名）
+//  注意：resolveId 收到的是相对源串（'./providers/index.js'），必须按短后缀匹配——
+//  曾经写成 'standalone/providers/index.js' 导致引擎搬家后 shim 静默失效、手机端 provider 全空。
 function webShims() {
   return {
     name: 'web-shims',
     enforce: 'pre',
     resolveId(source) {
       if (source.endsWith('discover.js')) return DISCOVER;
-      if (source.endsWith('standalone/providers/index.js')) return PROVIDERS_WEB;
+      if (source.endsWith('providers/index.js')) return PROVIDERS_WEB;
       return null;
     },
     load(id) {

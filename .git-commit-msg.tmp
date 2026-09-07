@@ -1,0 +1,12 @@
+fix: 修复手机端凭证 Provider 下拉为空——providers shim 匹配失效
+
+根因：引擎搬家后 capacitor vite shim 的匹配条件仍是
+endsWith('standalone/providers/index.js')，而 Vite resolveId 收到的
+是相对源串 './providers/index.js'，匹配不上导致动态 import 版注册表
+被打进 WebView 包，运行时动态加载 adapter 失败，provider 全空。
+搬家前恰好以 'server/providers/index.js' 结尾能命中，属搬家引入的回归。
+
+修复：匹配条件改为 endsWith('providers/index.js') 并注释说明。
+
+验证：新 bundle 中 12 个 adapter 全部静态内联、动态导入痕迹清零；
+重新打包 APK 并确认修复 bundle（index-Cq0SfYnA.js）已进包。
