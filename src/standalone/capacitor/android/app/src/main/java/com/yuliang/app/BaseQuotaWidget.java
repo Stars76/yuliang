@@ -127,6 +127,7 @@ public abstract class BaseQuotaWidget extends AppWidgetProvider {
                 v.setTextColor(R.id.single_number, p.text);
             }
         }
+        v.setTextColor(R.id.widget_refresh, p.sub);
         bindRefresh(ctx, v, R.id.widget_refresh);
         mgr.updateAppWidget(widgetId, v);
     }
@@ -155,6 +156,7 @@ public abstract class BaseQuotaWidget extends AppWidgetProvider {
                 }
             }
         }
+        v.setTextColor(R.id.widget_refresh, p.sub);
         bindRefresh(ctx, v, R.id.widget_refresh);
         mgr.updateAppWidget(widgetId, v);
     }
@@ -172,6 +174,7 @@ public abstract class BaseQuotaWidget extends AppWidgetProvider {
         svc.setData(Uri.parse(svc.toUri(0))); // 每实例独立适配器
         v.setEmptyView(R.id.widget_list, R.id.widget_empty);
         v.setRemoteAdapter(R.id.widget_list, svc);
+        v.setTextColor(R.id.widget_refresh, p.sub);
         bindRefresh(ctx, v, R.id.widget_refresh);
         mgr.updateAppWidget(widgetId, v);
         mgr.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_list);

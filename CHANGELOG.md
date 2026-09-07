@@ -8,6 +8,12 @@
 > - 语义：`MAJOR.MINOR.PATCH`。破坏性大改 → MAJOR；新增功能（如新平台/新组件）→ MINOR；修 bug/小改 → PATCH。
 > - 改完重新出包：`npm run dist:win`（Windows）、安卓见 `src/standalone/capacitor/README.md`。
 
+## 1.7.1 — 2026-09-07
+- **安卓凭证真加密**：新增 SecureCodec 插件（Android Keystore AES-256-GCM，密钥不可导出、卸载即销毁），capacitorStore 接入后凭证落盘为密文；存量明文自动平滑迁移，解密失败如实降级。附 5 个加密链路单测。
+- **加固**：`allowBackup="false"`（阻断系统备份/adb 提取凭证）；Electron loopback 服务加 Host 白名单校验（防 DNS rebinding）；小组件 ↻ 按钮补主题色（修复深色主题下不可见）。
+- **清理**：Capacitor 构建剔除 Web 专属 sw.js/manifest 死文件；vite dev proxy 移除指向已删服务器的残留配置。
+- 版本 1.7.1（versionCode 不变，待下次出包 +1）。
+
 ## 1.7.0 — 2026-09-07
 - **新增 OpenRouter provider**：`GET /api/v1/credits`（官方端点）→ 余额 = 购入额度 − 已用；附完整解析单测与安全白名单用例。现支持 12 个 provider。
 - **小组件 ↻ 刷新按钮（Android）**：全部 6 个尺寸的小组件新增刷新按钮，点击打开 App 并自动刷新一轮额度（PendingIntent 携带 widget_refresh 标记，前端桥读取后触发）。

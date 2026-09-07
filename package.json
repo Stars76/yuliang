@@ -2,7 +2,7 @@
   "name": "quota-dashboard",
   "private": true,
   "type": "module",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "余量 · 单机离线额度面板（Windows / Android）",
   "main": "src/standalone/electron/main.js",
   "scripts": {

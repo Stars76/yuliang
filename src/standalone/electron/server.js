@@ -169,6 +169,11 @@ export function createApiServer({ engine, webDist }) {
 
   const server = http.createServer(async (req, res) => {
     try {
+      // 防 DNS rebinding：仅接受本机 Host（浏览器同源本就发 127.0.0.1:<port>）
+      const host = String(req.headers.host ?? '').toLowerCase();
+      if (!/^127\.0\.0\.1(:\d+)?$/.test(host) && !/^\[::1\](:\d+)?$/.test(host) && host !== 'localhost' && !/^localhost:\d+$/.test(host)) {
+        return sendJson(res, 403, { error: 'bad_host' });
+      }
       const url = new URL(req.url, 'http://127.0.0.1');
       const pathname = url.pathname;
       if (pathname.startsWith('/api/')) {
