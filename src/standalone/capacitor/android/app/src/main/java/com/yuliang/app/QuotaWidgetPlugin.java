@@ -202,6 +202,18 @@ public class QuotaWidgetPlugin extends Plugin {
             } catch (Throwable ignored) {
             }
         }
+        if (brand.contains("oppo") || brand.contains("oneplus") || brand.contains("realme") || brand.contains("oneplus")) {
+            // OPPO/一加/真我（ColorOS 12+）：未授予「桌面快捷方式」权限时静默失败，
+            // 且 ColorOS 13+ 部分场景跳转桌面设置页而非确认框。跳应用详情引导开启。
+            try {
+                Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", c.getPackageName(), null));
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                c.startActivity(i);
+                return "coloros-permission";
+            } catch (Throwable ignored) {
+            }
+        }
         return "manual";
     }
 

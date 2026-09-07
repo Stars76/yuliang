@@ -82,6 +82,8 @@ export default function Widgets() {
         toast('已添加到桌面 ✓', 'ok');
       } else if (status === 'miui-permission') {
         toast('小米/红米需开启「桌面快捷方式」权限：已在系统弹出应用信息页 → 权限管理 → 桌面快捷方式 → 允许，然后回 App 重新点添加', 'warn');
+      } else if (status === 'coloros-permission') {
+        toast('ColorOS 需开启「桌面快捷方式」权限：已在系统弹出应用信息页 → 权限管理 → 打开「桌面快捷方式」，然后回 App 重新点添加', 'warn');
       } else if (status === 'picker') {
         toast('已打开系统小组件选择器，请在列表里选「余量」并放置', 'ok');
       } else {
@@ -166,7 +168,7 @@ export default function Widgets() {
             {busy ? '请求中…' : `添加到桌面（${size} · ${count} 个账号）`}
           </button>
           <p className="muted small">
-            已放置的小组件会随 App 刷新自动更新。若点「添加到桌面」没反应：小米/红米请到 系统设置 → 应用管理 → 余量 → 权限管理 → 开启「桌面快捷方式」后重试；其他系统请长按桌面空白处 → 小组件 → 找「余量」手动添加（账号/样式/尺寸已自动记住）。
+            已放置的小组件会随 App 刷新自动更新。若点「添加到桌面」没反应：小米/OPPO 系（含一加/真我）请到 系统设置 → 应用管理 → 余量 → 权限管理 → 开启「桌面快捷方式」后重试；其他系统请长按桌面空白处 → 小组件 → 找「余量」手动添加（账号/样式/尺寸已自动记住）。
           </p>
         </div>
       )}
