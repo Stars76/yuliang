@@ -4,8 +4,12 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -15,6 +19,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 // 小组件管理插件：把额度快照即时重绘；把「所选账号 + 样式 + 尺寸」固定为新的桌面小组件。
+// requestAdd 的 ROM 差异（实测归纳）：
+//  • 华为/荣耀、OPPO/三星：弹系统确认框，确认即上桌
+//  • 小米/红米：不弹框直接上桌，但需先授予「桌面快捷方式」权限，未授权则毫无反应
+//  • vivo/iQOO：不接其原子组件 SDK 则 requestPinAppWidget 完全无效
+// 因此：pin 请求发出后轮询 getAppWidgetIds 计数判断成败，失败按 ROM 差异化兜底。
 @CapacitorPlugin(name = "QuotaWidget")
 public class QuotaWidgetPlugin extends Plugin {
 
@@ -100,7 +109,7 @@ public class QuotaWidgetPlugin extends Plugin {
         }
     }
 
-    /** 直接由 App 添加小组件（API>=26 走系统请求固定；返回状态供前端给出精确引导）。 */
+    /** 直接由 App 添加小组件：pin 请求 + 计数轮询判定成败 + ROM 差异化兜底。 */
     @PluginMethod
     public void requestAdd(PluginCall call) {
         final String size = call.getString("size", "3x2");
@@ -116,32 +125,50 @@ public class QuotaWidgetPlugin extends Plugin {
             final AppWidgetManager mgr = AppWidgetManager.getInstance(c);
             // 先记下这份"待放置配置"：用户确认/手动添加后 onUpdate 会读取它固化为实例配置
             PendingWidgetConfig.pending(c, theme, accts);
-            ComponentName cn = new ComponentName(c, w);
+            final ComponentName cn = new ComponentName(c, w);
 
             if (Build.VERSION.SDK_INT >= 26) {
-                boolean ok = false;
+                final int before = countIds(mgr, c, w);
+                boolean requested = false;
                 try {
-                    ok = mgr.requestPinAppWidget(cn, new Bundle(), null);
-                } catch (Throwable t) {
-                    ok = false; // 个别 ROM 对未授权应用直接抛异常
+                    requested = mgr.requestPinAppWidget(cn, new Bundle(), null);
+                } catch (Throwable ignored) {
                 }
-                if (ok) {
-                    // 系统已受理（绝大多数 ROM 会弹放置框）；但 ColorOS/OriginOS 个别版本会静默忽略，
-                    // 无法从这里检测弹窗是否真出现 → 让前端同时给出"长按手动添加"兜底指引
-                    call.resolve(js("pin-ok"));
+                if (requested) {
+                    // 返回 true 不代表成功（launcher 可静默忽略，小米未授权快捷方式权限时即如此）。
+                    // 轮询计数：某次轮询发现 widgetId 变多 → 上桌成功；超时未变 → 按 ROM 兜底。
+                    final PluginCall pending = call;
+                    final Handler h = new Handler(Looper.getMainLooper());
+                    final int[] attempts = {0};
+                    final Runnable[] poll = new Runnable[1];
+                    poll[0] = new Runnable() {
+                        @Override
+                        public void run() {
+                            attempts[0]++;
+                            if (countIds(mgr, c, w) > before) {
+                                pending.resolve(js("pinned"));
+                                return;
+                            }
+                            if (attempts[0] >= 10) { // 10 次 × 400ms ≈ 4s 仍无变化
+                                pending.resolve(js(fallbackStatus(c)));
+                                return;
+                            }
+                            h.postDelayed(poll[0], 400);
+                        }
+                    };
+                    h.postDelayed(poll[0], 400);
                     return;
                 }
-                // requestPin 被拒/异常：降级尝试系统小组件选择器（部分 ROM 支持直接进列表）
+                // 请求被明确拒绝：尝试系统小组件选择器
                 if (launchPicker(c)) {
                     call.resolve(js("picker"));
                     return;
                 }
-                // 选择器也不可用：交给用户长按桌面手动添加
                 call.resolve(js("manual"));
                 return;
             }
 
-            // API < 26：只能走系统选择器（即便可用也只是打开列表供用户自行摆放）
+            // API < 26：只能走系统选择器
             if (launchPicker(c)) {
                 call.resolve(js("picker"));
             } else {
@@ -152,12 +179,30 @@ public class QuotaWidgetPlugin extends Plugin {
         }
     }
 
-    private static JSObject js(String status) {
+    private static int countIds(AppWidgetManager mgr, Context c, Class<?> w) {
         try {
-            return new JSObject().put("status", status);
+            int[] ids = mgr.getAppWidgetIds(new ComponentName(c, w));
+            return ids == null ? 0 : ids.length;
         } catch (Throwable t) {
-            return new JSObject();
+            return 0;
         }
+    }
+
+    /** 轮询超时未上桌 → 按品牌给出可操作的兜底状态（小米引导开权限，vivo 明说走手动）。 */
+    private static String fallbackStatus(Context c) {
+        String brand = Build.MANUFACTURER == null ? "" : Build.MANUFACTURER.toLowerCase();
+        if (brand.contains("xiaomi") || brand.contains("redmi")) {
+            // 小米：桌面快捷方式权限被关时请求无效；跳系统应用详情让用户一键开启
+            try {
+                Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", c.getPackageName(), null));
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                c.startActivity(i);
+                return "miui-permission";
+            } catch (Throwable ignored) {
+            }
+        }
+        return "manual";
     }
 
     /** 打开系统小组件选择器；打不开返回 false（引导用户长按桌面手动添加）。 */
@@ -170,6 +215,14 @@ public class QuotaWidgetPlugin extends Plugin {
             return true;
         } catch (Throwable t) {
             return false;
+        }
+    }
+
+    private static JSObject js(String status) {
+        try {
+            return new JSObject().put("status", status);
+        } catch (Throwable t) {
+            return new JSObject();
         }
     }
 }

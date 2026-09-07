@@ -78,12 +78,15 @@ export default function Widgets() {
     try {
       const res = await window.Capacitor.Plugins.QuotaWidget.requestAdd({ size, theme, accounts: arr });
       const status = res?.status;
-      if (status === 'picker') {
+      if (status === 'pinned') {
+        toast('已添加到桌面 ✓', 'ok');
+      } else if (status === 'miui-permission') {
+        toast('小米/红米需开启「桌面快捷方式」权限：已在系统弹出应用信息页 → 权限管理 → 桌面快捷方式 → 允许，然后回 App 重新点添加', 'warn');
+      } else if (status === 'picker') {
         toast('已打开系统小组件选择器，请在列表里选「余量」并放置', 'ok');
-      } else if (status === 'manual') {
-        toast('系统不弹放置框：请长按桌面空白处 → 小组件 → 找到「余量」手动添加（配置已记住）', 'ok');
       } else {
-        toast('若弹出放置框请按提示摆放；没弹出就长按桌面 → 小组件 → 余量 手动添加', 'ok');
+        // manual：vivo 等未接厂商 SDK 的 ROM 请求无效，只能手动
+        toast('该系统不支持应用内自动放置：请长按桌面空白处 → 小组件 → 找「余量」手动添加（配置已记住）', 'ok');
       }
     } catch (ex) {
       toast(ex.message || '请求放置失败');
@@ -163,8 +166,7 @@ export default function Widgets() {
             {busy ? '请求中…' : `添加到桌面（${size} · ${count} 个账号）`}
           </button>
           <p className="muted small">
-            添加到桌面需系统确认；若点了没弹窗，请<strong>长按桌面空白处 → 小组件 → 找「余量」</strong>手动添加（本次选择的账号/样式/尺寸已自动记住）。
-            已放置的小组件会随 App 刷新自动更新。
+            已放置的小组件会随 App 刷新自动更新。若点「添加到桌面」没反应：小米/红米请到 系统设置 → 应用管理 → 余量 → 权限管理 → 开启「桌面快捷方式」后重试；其他系统请长按桌面空白处 → 小组件 → 找「余量」手动添加（账号/样式/尺寸已自动记住）。
           </p>
         </div>
       )}
