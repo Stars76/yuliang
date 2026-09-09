@@ -13,7 +13,7 @@ const version = JSON.parse(fs.readFileSync(path.join(capRoot, 'package.json'), '
 const isDebug = process.env.APK_DEBUG === '1';
 const buildType = isDebug ? 'debug' : 'release';
 const tag = isDebug ? 'debug-' : '';
-const src = path.join(capRoot, 'android', 'app', 'build', 'outputs', 'apk', buildType, `app-${buildType}.apk`);
+const src = path.join(capRoot, 'android', 'app', 'build', 'outputs', 'apk', buildType, `yuliang-${version}.apk`);
 const outDir = path.resolve(capRoot, '..', '..', '..', 'release-android'); // 仓库根 release-android/
 
 if (!fs.existsSync(src)) {

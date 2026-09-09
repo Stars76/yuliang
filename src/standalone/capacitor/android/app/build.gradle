@@ -47,6 +47,12 @@ android {
             }
         }
     }
+    // APK 输出名统一为 yuliang-<版本>.apk（与 copy-apk.mjs / README 一致），而非默认的 app-release.apk。
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = "yuliang-${variant.versionName}.apk"
+        }
+    }
 }
 
 repositories {
