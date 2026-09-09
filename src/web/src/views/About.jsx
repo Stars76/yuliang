@@ -1,9 +1,23 @@
+import { useEffect, useState } from 'react';
 import { PROVIDER_LABELS } from '../util.js';
 
 // 关于页：版本信息、数据安全说明、支持的服务一览。
 // __APP_VERSION__ 由两套 vite 配置的 define 从根 package.json 注入。
 export default function About() {
   const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
+  const [secure, setSecure] = useState(true);
+  useEffect(() => {
+    // Electron 经 preload 读取本机存储是否加密；Android 无此桥（默认 keystore 加密），忽略。
+    let alive = true;
+    try {
+      const meta = window.standalone?.meta?.();
+      if (meta && typeof meta.then === 'function') {
+        meta.then((m) => { if (alive) setSecure(m?.secure !== false); }).catch(() => {});
+      }
+    } catch {}
+    return () => { alive = false; };
+  }, []);
+
   return (
     <div className="about-page">
       <section className="card about-card">
@@ -18,6 +32,16 @@ export default function About() {
           把多个 AI 编码订阅服务的剩余额度、限额窗口与重置时间聚合到一张面板。所有取数均为只读查询，不产生任何模型用量。
         </p>
       </section>
+
+      {!secure && (
+        <section className="card about-card about-warn">
+          <h3 className="about-h3">⚠ 凭证未加密存储</h3>
+          <p className="about-desc">
+            当前平台未提供可用的系统钥匙串（Windows 凭据管理器 / Android Keystore），凭证以明文 JSON 存在本机。
+            请勿在共享设备使用，或检查系统安全存储是否可用后再添加凭证。
+          </p>
+        </section>
+      )}
 
       <section className="card about-card">
         <h3 className="about-h3">数据与隐私</h3>

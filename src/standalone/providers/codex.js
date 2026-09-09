@@ -1,7 +1,7 @@
 // codex 特例（契约 §codex 特例）：凭证 = { managementKey }，alias 固定 "CLIProxyAPI"
 // 走本机 CPA 管理口（白名单 http 特例），绝不调用 /v0/management/usage-queue
 // 默认 http://127.0.0.1:8317；容器部署用 CPA_MGMT_URL 指向 docker 网关（compose 已配）
-import { QuotaError } from './http.js';
+import { QuotaError, httpStatusToError, parseJson } from './http.js';
 import { env } from '../env.js';
 
 const MGMT = (env.cpaMgmtUrl || 'http://127.0.0.1:8317').replace(/\/+$/, '');
@@ -67,9 +67,7 @@ async function mgmtFetch(cred, method, path, body) {
 }
 
 function checkHttp(status, label) {
-  if (status === 401 || status === 403) throw new QuotaError('auth_expired', `codex: ${label} http ${status}`);
-  if (status === 429) throw new QuotaError('rate_limited', `codex: ${label} http 429`);
-  if (status !== 200) throw new QuotaError('unavailable', `codex: ${label} http ${status}`);
+  httpStatusToError(status, `codex: ${label}`);
 }
 
 // auth-files 响应解析（纯函数，便于测试）
@@ -86,13 +84,7 @@ export function parseAuthFiles(json) {
 
 // api-call 响应解包：兼容 CPA 包装 {status, body}（body 可为 JSON 字符串）与上游原文直出
 export function parseApiCallResponse(httpStatus, bodyText) {
-  checkHttp(httpStatus, 'api-call');
-  let json;
-  try {
-    json = JSON.parse(bodyText);
-  } catch {
-    throw new QuotaError('upstream_changed', 'codex: api-call body is not json');
-  }
+  const json = parseJson(httpStatus, bodyText, 'codex: api-call', 'codex: api-call body is not json');
   if (json && typeof json === 'object' && typeof json.status === 'number' && 'body' in json) {
     checkHttp(json.status, 'wham/usage');
     let inner = json.body;
@@ -229,13 +221,7 @@ export function extractSignalsQuota(json, authIndex) {
 
 export async function listAccounts(cred) {
   const { status, text } = await mgmtFetch(cred, 'GET', '/v0/management/auth-files');
-  checkHttp(status, 'auth-files');
-  let json;
-  try {
-    json = JSON.parse(text);
-  } catch {
-    throw new QuotaError('upstream_changed', 'codex: auth-files body is not json');
-  }
+  const json = parseJson(status, text, 'codex: auth-files', 'codex: auth-files body is not json');
   return parseAuthFiles(json);
 }
 
@@ -264,8 +250,10 @@ export async function fetchCodexQuota(cred, authIndex) {
       'GET',
       '/v0/management/plugins/cpa-account-config-manager/accounts',
     );
-    checkHttp(status, 'cache-accounts');
-    const snap = extractCacheSnapshot(JSON.parse(text), authIndex);
+    const snap = extractCacheSnapshot(
+      parseJson(status, text, 'codex: cache-accounts', 'codex: cache-accounts body is not json'),
+      authIndex,
+    );
     if (snap) return { ...snap, source: 'cache', error: null };
   } catch {
     // 继续回退
@@ -273,8 +261,10 @@ export async function fetchCodexQuota(cred, authIndex) {
   // 链路 3：auth-files quota.signals（X-Codex-* 被动信号）
   try {
     const { status, text } = await mgmtFetch(cred, 'GET', '/v0/management/auth-files');
-    checkHttp(status, 'auth-files');
-    const sig = extractSignalsQuota(JSON.parse(text), authIndex);
+    const sig = extractSignalsQuota(
+      parseJson(status, text, 'codex: auth-files', 'codex: auth-files body is not json'),
+      authIndex,
+    );
     if (sig) return { ...sig, source: 'cache', error: null };
   } catch {
     // 全部失败

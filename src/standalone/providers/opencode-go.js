@@ -1,7 +1,7 @@
 // OpenCode（自动识别 Go / Zen）—— GET https://opencode.ai/zen/go/v1/usage（必须 Bearer）
 // 端点未文档化且改过形态：新形态 {"usage":{rolling|weekly|monthly:{status,percent,resetsAt}}}
 // 旧形态扁平 {rollingUsage|weeklyUsage|monthlyUsage:{usagePercent,resetInSec}}，两种都解析
-import { QuotaError } from './http.js';
+import { QuotaError, parseJson } from './http.js';
 
 const ENDPOINT = 'https://opencode.ai/zen/go/v1/usage';
 const ZEN_UNAVAILABLE_MESSAGE = '已识别为 OpenCode Zen；当前没有公开的 API Key 余额查询接口';
@@ -138,15 +138,7 @@ export default {
         error: { kind: 'unavailable', message: ZEN_UNAVAILABLE_MESSAGE },
       };
     }
-    if (status === 401 || status === 403) throw new QuotaError('auth_expired', `opencode-go http ${status}`);
-    if (status === 429) throw new QuotaError('rate_limited', 'opencode-go http 429');
-    if (status !== 200) throw new QuotaError('unavailable', `opencode-go http ${status}`);
-    let json;
-    try {
-      json = JSON.parse(bodyText);
-    } catch {
-      throw new QuotaError('upstream_changed', 'opencode-go: body is not json');
-    }
+    const json = parseJson(status, bodyText, 'opencode-go');
     if (!json || typeof json !== 'object' || Array.isArray(json)) {
       throw new QuotaError('upstream_changed', 'opencode-go: body is not an object');
     }

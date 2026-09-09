@@ -66,12 +66,20 @@ cd C:\capbuild\android
 
 ## 上架 / 正式签名
 
+`build.gradle` 现在从 gitignored 的 `keystore.properties` 读取 release 签名：存在则自动用 release 签名，不存在则回退 debug（本机/CI 仍可构建）。`*.jks` 与 `keystore.properties` 均已 gitignore，绝不入库。
+
 ```bash
-cd <ASCII路径>/android
+cd src/standalone/capacitor/android
+# 1) 生成密钥库
+keytool -genkeypair -v -keystore yuliang-release.jks -keyalg RSA -keysize 2048 -validity 36500 -alias yuliang
+# 2) 复制模板并填入你的值（storeFile 路径相对 android 根，或写绝对路径）
+copy keystore.properties.example keystore.properties
+# 3) 构建
 gradlew bundleRelease          # AAB（Play 上架用）
 gradlew assembleRelease        # APK
 ```
-debug APK 用默认 debug keystore，可直接侧载到真机/模拟器安装测试；正式分发需配 release keystore 签名（Play 还需 AAB）。
+
+debug 密钥只用于侧载测试；正式分发必须用你自己的 keystore 签名（Play 上架还需 AAB）。
 
 ## 已知限制
 

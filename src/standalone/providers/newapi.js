@@ -1,7 +1,7 @@
 // New API / One API 系自建站 —— kind:'balance'，GET {instanceUrl}/api/user/self
 // 鉴权：Authorization: Bearer <系统访问令牌> + New-Api-User: <用户ID>（均在该站个人设置页生成/查看）
 // 响应：{success:true, data:{username, quota, used_quota, ...}}；额度单位 500000 = 1 USD
-import { QuotaError } from './http.js';
+import { QuotaError, parseJson } from './http.js';
 
 export const QUOTA_PER_USD = 500000;
 
@@ -52,15 +52,7 @@ export default {
     };
   },
   parseResponse(status, bodyText) {
-    if (status === 401 || status === 403) throw new QuotaError('auth_expired', `newapi http ${status}`);
-    if (status === 429) throw new QuotaError('rate_limited', 'newapi http 429');
-    if (status !== 200) throw new QuotaError('unavailable', `newapi http ${status}`);
-    let json;
-    try {
-      json = JSON.parse(bodyText);
-    } catch {
-      throw new QuotaError('upstream_changed', 'newapi: body is not json');
-    }
+    const json = parseJson(status, bodyText, 'newapi');
     if (!json || typeof json !== 'object') {
       throw new QuotaError('upstream_changed', 'newapi: body is not an object');
     }

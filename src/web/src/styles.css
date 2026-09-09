@@ -982,6 +982,13 @@ html[data-theme='light'] [data-p='newapi'] { --p: #16a34a; }
   text-align: center;
   margin: 4px 0 12px;
 }
+.about-warn {
+  border: 1px solid var(--red, #e05252);
+  background: color-mix(in srgb, var(--red, #e05252) 8%, var(--surface));
+}
+.about-warn .about-h3 {
+  color: var(--red, #e05252);
+}
 
 /* 工具栏阈值选择器：继承全局 select 基础样式，只做紧凑化 */
 .threshold-ctl {
@@ -995,6 +1002,25 @@ html[data-theme='light'] [data-p='newapi'] { --p: #16a34a; }
   font-size: 13px;
   border-radius: 8px;
   cursor: pointer;
+}
+
+.search-input {
+  min-height: 0;
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  width: 180px;
+  max-width: 100%;
+}
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 .card-head {

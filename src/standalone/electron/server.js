@@ -37,6 +37,7 @@ function errToStatus(code) {
   if (code === 'unknown_provider' || code === 'invalid_fields' || code === 'bad_request') return 400;
   if (code === 'credential_not_found' || code === 'account_not_found') return 404;
   if (code === 'expired') return 410;
+  if (code === 'refresh_throttled') return 429;
   if (code === 'adapter_unavailable') return 503;
   if (code === 'upstream' || code === 'auth_expired' || code === 'rate_limited' || code === 'unavailable' || code === 'upstream_changed') return 502;
   return 500;

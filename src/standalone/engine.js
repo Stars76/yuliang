@@ -18,6 +18,9 @@ import {
 
 const CACHE_TTL_MS = 60_000;
 const BACKOFF_CAP_MS = 30 * 60_000;
+// 手动刷新全局限流：每分钟最多 REFRESH_LIMIT 次（docs/data-sources.md 承诺）
+const REFRESH_LIMIT = 5;
+const REFRESH_WINDOW_MS = 60_000;
 
 // 单机/安卓专属：给 codex 追加"手填 CPA 管理地址"字段（服务器 credentialFields 不含此项，行为不变）。
 const CODEX_URL_FIELD = {
@@ -49,6 +52,15 @@ export function createEngine({ store, cpaMgmtUrl = null, home, hiddenProviders =
 
   const quotaCache = new Map(); // accountId -> {result, fetchedAt, fails, nextRetryAt}
   const inflight = new Map();
+  const refreshTimestamps = []; // 手动刷新限流：滑动窗口
+
+  // 手动刷新（force）全局限流：超过每分钟上限则拒绝，静默/后台刷新不受影响
+  function enforceRefreshLimit() {
+    const now = Date.now();
+    while (refreshTimestamps.length && refreshTimestamps[0] <= now - REFRESH_WINDOW_MS) refreshTimestamps.shift();
+    if (refreshTimestamps.length >= REFRESH_LIMIT) throw err('refresh_throttled');
+    refreshTimestamps.push(now);
+  }
 
   async function credentialSources() {
     const out = [];
@@ -283,6 +295,7 @@ export function createEngine({ store, cpaMgmtUrl = null, home, hiddenProviders =
       return collectQuota();
     },
     async refreshQuota(accountId) {
+      enforceRefreshLimit();
       return collectQuota({ force: true, onlyAccountId: accountId ?? null });
     },
 

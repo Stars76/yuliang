@@ -1,0 +1,74 @@
+name: release
+
+# 自动发布：push 一个 v* 标签（或用 Actions 手动触发）时，
+# 在 Windows 上构建 NSIS 安装包、在 Linux 上构建 Android APK，并自动创建 GitHub Release 附上产物。
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 构建前端（Electron）
+        run: |
+          npm ci
+          npm ci --prefix src/web
+          npm run build:web
+      - name: 打包 Windows 安装包（NSIS）
+        run: npm run dist:win
+      - name: 上传安装包产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-setup
+          path: release/*.exe
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: 构建 Android WebView 前端
+        run: |
+          npm ci --prefix src/standalone/capacitor
+          npm run build:android-web
+      - name: 构建 APK（assembleRelease）
+        working-directory: src/standalone/capacitor/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+      - name: 上传 APK 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: src/standalone/capacitor/android/app/build/outputs/apk/release/*.apk
+
+  release:
+    needs: [windows, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - name: 创建/更新 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # draft: true   # 想先人工检查再发布，就取消注释这行
+          generate_release_notes: true
+          files: |
+            dist/windows-setup/*.exe
+            dist/android-apk/*.apk

@@ -18,9 +18,54 @@ jobs:
       - name: 引擎 + provider 测试
         run: npm test
 
-      - name: 前端构建（Electron 壳 + Android WebView）
+      - name: 前端构建（Electron 壳）
         run: |
           npm ci --prefix src/web
           npm run build:web
+
+      - name: Android WebView 构建
+        run: |
           npm ci --prefix src/standalone/capacitor
           npm run build:android-web
+
+  smoke:
+    # Windows 壳冒烟：真实拉起 Electron（xvfb 无头）走 QD_SMOKE 路径，验证服务端 + 渲染 + 图标。
+    # 独立 job，冒烟失败不阻塞核心 verify。
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 构建前端
+        run: |
+          npm ci --prefix src/web
+          npm run build:web
+      - name: 安装并拉起 Electron 冒烟
+        run: |
+          npm ci
+          xvfb-run -a npx electron . --no-sandbox
+        env:
+          QD_SMOKE: '1'
+
+  android:
+    # 真正的 Android 组装（assembleRelease），验证原生侧没有在 CI 里悄悄坏掉。
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: 构建 Android WebView
+        run: |
+          npm ci --prefix src/standalone/capacitor
+          npm run build:android-web
+      - name: Gradle assembleRelease
+        working-directory: src/standalone/capacitor/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon

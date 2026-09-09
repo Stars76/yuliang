@@ -1,6 +1,6 @@
 // Kimi For Coding —— GET https://api.kimi.com/coding/v1/usages（Bearer 鉴权）
 // 套餐名另取 GET /coding/v1/me 的 user_level_name（/usages 只有 LEVEL_* 内部枚举）
-import { QuotaError } from './http.js';
+import { QuotaError, parseJson } from './http.js';
 
 const ENDPOINT = 'https://api.kimi.com/coding/v1/usages';
 const ME_ENDPOINT = 'https://api.kimi.com/coding/v1/me';
@@ -91,15 +91,7 @@ export default {
     ];
   },
   parseResponse(status, bodyText, extras) {
-    if (status === 401 || status === 403) throw new QuotaError('auth_expired', `kimi http ${status}`);
-    if (status === 429) throw new QuotaError('rate_limited', 'kimi http 429');
-    if (status !== 200) throw new QuotaError('unavailable', `kimi http ${status}`);
-    let data;
-    try {
-      data = JSON.parse(bodyText);
-    } catch {
-      throw new QuotaError('upstream_changed', 'kimi: body is not json');
-    }
+    const data = parseJson(status, bodyText, 'kimi');
     if (!data || typeof data !== 'object' || !Array.isArray(data.limits)) {
       throw new QuotaError('upstream_changed', 'kimi: limits array missing');
     }

@@ -10,6 +10,26 @@ export class QuotaError extends Error {
 
 const TIMEOUT_MS = 10_000;
 
+// ---- 共享解析辅助：把各 provider 重复的「HTTP 状态 → QuotaError」与「JSON 解析」收敛到一处 ----
+
+// 统一 HTTP 状态码 → QuotaError 映射（providers 共用）
+export function httpStatusToError(status, label) {
+  if (status === 401 || status === 403) throw new QuotaError('auth_expired', `${label} http ${status}`);
+  if (status === 429) throw new QuotaError('rate_limited', `${label} http 429`);
+  if (status !== 200) throw new QuotaError('unavailable', `${label} http ${status}`);
+}
+
+// 状态校验 + JSON 解析：非 200 抛对应错误；body 非 JSON 抛 upstream_changed
+// jsonMessage 可覆盖默认的「<label>: body is not json」（个别 provider 有更具体的措辞）
+export function parseJson(status, bodyText, label, jsonMessage) {
+  httpStatusToError(status, label);
+  try {
+    return JSON.parse(bodyText);
+  } catch {
+    throw new QuotaError('upstream_changed', jsonMessage ?? `${label}: body is not json`);
+  }
+}
+
 function assertAllowed(adapter, req) {
   const url = new URL(req.url);
   // http 特例：CPA 管理口（127.0.0.1 本机 / host.docker.internal docker 网关，均不出宿主机）

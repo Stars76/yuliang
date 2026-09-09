@@ -1,5 +1,5 @@
 // zai / bigmodel —— GET /api/monitor/usage/quota/limit（Authorization 裸 key，无 Bearer 前缀）
-import { QuotaError } from './http.js';
+import { QuotaError, parseJson } from './http.js';
 
 const PATH = '/api/monitor/usage/quota/limit';
 
@@ -16,15 +16,7 @@ function classifyWindow(entry) {
 }
 
 function parseQuotaResponse(status, bodyText) {
-  if (status === 401 || status === 403) throw new QuotaError('auth_expired', `zhipu http ${status}`);
-  if (status === 429) throw new QuotaError('rate_limited', 'zhipu http 429');
-  if (status !== 200) throw new QuotaError('unavailable', `zhipu http ${status}`);
-  let json;
-  try {
-    json = JSON.parse(bodyText);
-  } catch {
-    throw new QuotaError('upstream_changed', 'zhipu: body is not json');
-  }
+  const json = parseJson(status, bodyText, 'zhipu');
   const data = json?.data;
   if (!data || typeof data !== 'object' || !Array.isArray(data.limits)) {
     throw new QuotaError('upstream_changed', 'zhipu: data.limits missing');

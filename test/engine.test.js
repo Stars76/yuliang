@@ -254,3 +254,21 @@ test('engine: QuotaError 透传 kind（auth_expired 不会被吞成 unavailable�
     sb.done();
   }
 });
+
+test('engine: 手动刷新限流——每分钟最多 5 次，超出抛 refresh_throttled，窗口过后恢复，不影响 getQuota', async () => {
+  const sb = withSandbox(() => res200(FIXTURE_OK));
+  try {
+    const ids = await withCreds(sb, ['sk-test-a']);
+    for (let i = 0; i < 5; i++) await sb.engine.refreshQuota(ids[0]);
+    assert.equal(sb.calls.length, 5, '前 5 次手动刷新放行');
+    await assert.rejects(() => sb.engine.refreshQuota(ids[0]), (e) => e.code === 'refresh_throttled');
+    assert.equal(sb.calls.length, 5, '超出限流不发请求');
+    sb.travel(60_000);
+    await sb.engine.refreshQuota(ids[0]);
+    assert.equal(sb.calls.length, 6, '窗口过后恢复刷新');
+    await sb.engine.getQuota(); // 普通取数不受限流影响
+    assert.ok(sb.calls.length >= 6);
+  } finally {
+    sb.done();
+  }
+});

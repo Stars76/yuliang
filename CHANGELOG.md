@@ -8,6 +8,18 @@
 > - 语义：`MAJOR.MINOR.PATCH`。破坏性大改 → MAJOR；新增功能（如新平台/新组件）→ MINOR；修 bug/小改 → PATCH。
 > - 改完重新出包：`npm run dist:win`（Windows）、安卓见 `src/standalone/capacitor/README.md`。
 
+## 1.8.0 — 2026-09-09
+- **工程重构：统一 provider 解析辅助**：`providers/http.js` 新增 `httpStatusToError` / `parseJson`，把 12 个 provider 重复的「HTTP 状态 → QuotaError 映射」与「JSON 解析」收敛为共享函数（401/403/429/非200/坏 JSON 分支全部对齐），行为与错误类型保持不变。Codex 的 `checkHttp` 也改走同一映射。
+- **手动刷新全局限流**：`refreshQuota` 每分钟最多 5 次，超出反馈「刷新太频繁」，与 `docs/data-sources.md` 的承诺一致；后台/静默刷新不受影响。附 1 个限流单测。
+- **开源准备**：`package.json` 补 `repository`/`homepage`/`bugs` 元数据与 `license`；README 下载链接指向 GitHub Releases、新增仓库说明；新增 `npm run release:bump`（同步三处版本号 + 递增 versionCode）；CI 增加 Electron 冒烟（xvfb）与 Android `assembleRelease` 构建。
+- **自动发布工作流**：新增 `.github/workflows/release.yml`——push `v*` 标签（或手动触发）时在 Windows 构建 NSIS 安装包、在 Linux 构建 APK，并自动创建 GitHub Release 附上产物（版本约定见本文件顶部）。
+- **Android 正式签名配置**：`build.gradle` 改为从 gitignored `keystore.properties` 读取 release 签名，未配置时回退 debug 签名（本机/CI 仍可构建）；新增 `keytool` 生成指引与 `keystore.properties.example` 模板，并 gitignore `keystore.properties`。
+- **仪表盘轻量筛选**：新增按别名/服务名的搜索框，分组与总览视图通用。
+- **重置到点自动刷新节流**：改为 60s 节流，避免上游返回旧 `resetAt` 时同一账号反复触发刷新。
+- **凭证未加密降级提示**：「关于」页在系统钥匙串不可用时给出警告（Electron 经 preload 读取）。
+- **清理死文件**：移除 PWA 遗留的 `sw.js`、`manifest.webmanifest`、`icon-192/512/maskable` 图标及注册代码（单机离线版用不到）。
+- 版本 1.8.0（安卓 versionCode 17）。
+
 ## 1.7.2 — 2026-09-07
 - **修复手机端凭证 Provider 下拉为空**（真机反馈）：引擎搬家后 Capacitor 打包 shim 的路径匹配静默失效，动态注册表被打进 WebView 导致 provider 加载全失败。修复后 12 个 adapter 静态内联，仪表盘/凭证/小组件一并恢复。
 - 版本 1.7.2（安卓 versionCode 16）。装了 1.7.1 的用户可直接覆盖安装（同签名）。

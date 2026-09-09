@@ -2,8 +2,17 @@
   "name": "quota-dashboard",
   "private": true,
   "type": "module",
-  "version": "1.7.2",
+  "version": "1.8.0",
   "description": "余量 · 单机离线额度面板（Windows / Android）",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GenZ/yuliang.git"
+  },
+  "homepage": "https://github.com/GenZ/yuliang",
+  "bugs": {
+    "url": "https://github.com/GenZ/yuliang/issues"
+  },
   "main": "src/standalone/electron/main.js",
   "scripts": {
     "test": "node --test \"test/**/*.test.js\"",
@@ -11,7 +20,8 @@
     "build:web": "npm --prefix src/web run build",
     "build:android-web": "npm --prefix src/standalone/capacitor run build",
     "electron": "electron .",
-    "dist:win": "electron-builder --win"
+    "dist:win": "electron-builder --win",
+    "release:bump": "node scripts/bump-version.mjs"
   },
   "devDependencies": {
     "electron": "^33.2.0",
@@ -35,7 +45,9 @@
       "main": "src/standalone/electron/main.js"
     },
     "win": {
-      "target": ["nsis", "portable"],
+      "target": [
+        "nsis"
+      ],
       "icon": "src/standalone/electron/icon.ico",
       "signAndEditExecutable": false
     },

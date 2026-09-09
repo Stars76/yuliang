@@ -50,20 +50,36 @@ export default function Dashboard() {
   const [now, setNow] = useState(Date.now());
   const [threshold, setThresholdState] = useState(getThreshold);
   const [nearLimitIds, setNearLimitIds] = useState(() => new Set());
+  const [search, setSearch] = useState('');
   const toast = useToast();
-  const firedRef = useRef(new Set());
+  const autoRefRes = useRef(new Map()); // accountId -> 上次自动刷新时间（重置到点节流）
   const dragProviderRef = useRef(null);
   const dragAccountRef = useRef(null);
 
-  const groups = useMemo(() => (accounts ? groupAccounts(accounts, groupOrder) : []), [accounts, groupOrder]);
+  // 轻量筛选：按账号别名或服务名（provider 标签）过滤，空关键词=全部
+  const visibleAccounts = useMemo(() => {
+    if (!accounts) return null;
+    const q = search.trim().toLowerCase();
+    if (!q) return accounts;
+    return accounts.filter((a) => {
+      const alias = (a.alias ?? '').toLowerCase();
+      const label = (PROVIDER_LABELS[a.provider] || a.provider).toLowerCase();
+      return alias.includes(q) || label.includes(q);
+    });
+  }, [accounts, search]);
+
+  const groups = useMemo(
+    () => (visibleAccounts ? groupAccounts(visibleAccounts, groupOrder) : []),
+    [visibleAccounts, groupOrder],
+  );
   const overviewAccounts = useMemo(() => {
-    if (!accounts) return [];
-    if (accountOrder.length === 0) return accounts;
-    const byId = new Map(accounts.map((a) => [a.accountId, a]));
+    if (!visibleAccounts) return [];
+    if (accountOrder.length === 0) return visibleAccounts;
+    const byId = new Map(visibleAccounts.map((a) => [a.accountId, a]));
     const ordered = accountOrder.map((id) => byId.get(id)).filter(Boolean);
-    const rest = accounts.filter((a) => !accountOrder.includes(a.accountId));
+    const rest = visibleAccounts.filter((a) => !accountOrder.includes(a.accountId));
     return [...ordered, ...rest];
-  }, [accounts, accountOrder]);
+  }, [visibleAccounts, accountOrder]);
 
   // 阈值提醒检测：每次数据到达后跑一次；fire 弹 Toast（一次性），rearm/stale 维护已提醒集合
   const alertedRef = useRef(getAlertedSet());
@@ -98,7 +114,6 @@ export default function Dashboard() {
       const data = await api.quota();
       setAccounts(data.accounts);
       setLastRefresh(Date.now());
-      firedRef.current.clear();
     } catch (ex) {
       if (!silent) toast(ex.message || '拉取额度失败');
     }
@@ -108,7 +123,8 @@ export default function Dashboard() {
     load();
   }, [load]);
 
-  // 统一心跳：驱动倒计时 / 相对时间 / 重置到点检测
+  // 统一心跳：驱动倒计时 / 相对时间 / 重置到点检测。重置到点自动刷新每个账号，
+  // 用 60s 节流防止上游刷新后仍返回旧 resetAt 时反复触发（同账号 1 分钟内不重复自动刷新）。
   useEffect(
     () =>
       subscribeTick(() => {
@@ -117,9 +133,12 @@ export default function Dashboard() {
         if (accounts) {
           for (const a of accounts) {
             for (const w of a.windows) {
-              if (w.resetAt && w.resetAt <= t && !firedRef.current.has(a.accountId)) {
-                firedRef.current.add(a.accountId);
-                refreshAccount(a.accountId);
+              if (w.resetAt && w.resetAt <= t) {
+                const last = autoRefRes.current.get(a.accountId) ?? 0;
+                if (t - last > 60_000) {
+                  autoRefRes.current.set(a.accountId, t);
+                  refreshAccount(a.accountId);
+                }
                 break;
               }
             }
@@ -274,6 +293,14 @@ export default function Dashboard() {
               ))}
             </select>
           </label>
+          <input
+            className="search-input"
+            type="search"
+            value={search}
+            placeholder="按别名或服务筛选…"
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label="筛选账号"
+          />
         </div>
       </div>
 
@@ -283,11 +310,14 @@ export default function Dashboard() {
             <SkeletonCard key={i} />
           ))}
         </div>
-      ) : accounts.length === 0 ? (
-        <EmptyState title="暂无账号" hint="请到「凭证管理」添加第一个账号" />
+      ) : visibleAccounts && visibleAccounts.length === 0 ? (
+        <EmptyState
+          title={search.trim() ? '无匹配账号' : '暂无账号'}
+          hint={search.trim() ? '换个关键词试试' : '请到「凭证管理」添加第一个账号'}
+        />
       ) : viewMode === 'overview' ? (
         <>
-          <Overview accounts={accounts} />
+          <Overview accounts={visibleAccounts} />
           <div className="card-grid overview-grid" role="list" aria-label="账号列表">
             {overviewAccounts.map((a) => (
               <div key={a.accountId} {...dragAccountProps(a.accountId)}>
@@ -298,7 +328,7 @@ export default function Dashboard() {
         </>
       ) : (
         <>
-          <Overview accounts={accounts} />
+          <Overview accounts={visibleAccounts} />
           {groups.map((g) => (
             <section className={`acct-group${collapsed[g.provider] ? ' collapsed' : ''}`} key={g.provider} {...dragGroupProps(g.provider)}>
               <div className="group-head">

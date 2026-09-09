@@ -3,18 +3,24 @@
 一个**单机离线**的 AI 编码订阅额度面板：把 Codex(ChatGPT)、Kimi、GLM(Z.AI/BigModel)、DeepSeek、OpenCode、Ollama、Command Code、sub2api、newapi 等 11 类服务的剩余额度、限额窗口与重置时间，统一到一张面板上。**没有服务器、没有账户体系、凭证只存你自己的设备。**
 
 > 支持 **Windows（Electron）** 与 **Android（Capacitor）**，两端共用同一份引擎与前端。
+>
+> 开源仓库：[GenZ/yuliang](https://github.com/GenZ/yuliang)（MIT 许可证），欢迎提 Issue / PR。
+
+<p align="left">
+  <a href="https://github.com/GenZ/yuliang/actions/workflows/verify.yml"><img src="https://github.com/GenZ/yuliang/actions/workflows/verify.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License">
+  <img src="https://img.shields.io/github/v/release/GenZ/yuliang" alt="Release">
+</p>
 
 ## 下载安装
 
-<!-- TODO: 发布后把下面的占位链接换成实际地址（GitHub Releases / 网盘 / 蓝奏云均可） -->
-
 **Windows**（10/11 x64）
-1. 下载安装包 `余量 Setup <版本>.exe`（链接：*待填*）
+1. 到 [GitHub Releases](https://github.com/GenZ/yuliang/releases/latest) 下载 `余量 Setup <版本>.exe`
 2. 双击安装。首次运行若出现 SmartScreen 蓝色警告：点「更多信息」→「仍要运行」（应用未购买代码签名证书，属正常提示）
 3. 到「凭证管理」添加第一个账号即可
 
 **Android**（8.0+）
-1. 下载 APK `yuliang-<版本>.apk`（链接：*待填*）
+1. 到 [GitHub Releases](https://github.com/GenZ/yuliang/releases/latest) 下载 `yuliang-<版本>.apk`
 2. 安装时允许「来自此来源的应用」（设置 → 安全 → 安装未知应用）
 3. 添加账号后可在「小组件」页把额度卡片加到桌面；小组件右上角 ↻ 可刷新并打开 App
 
@@ -53,7 +59,10 @@ npm run build:web              # Electron 壳前端构建
 npm run build:android-web      # Android WebView 构建
 npm run electron               # 启动 Windows 壳（开发）
 npm run dist:win               # 打包 Windows 安装包 → release/
+npm run release:bump           # 同步三处版本号 + 递增 Android versionCode
 ```
+
+> 版本号由 `npm run release:bump` 同步（根 `package.json`、`capacitor/package.json`、`build.gradle` 的 `versionName`），并自动 +1 `versionCode`；出包前先跑它。
 
 ## 架构速览
 
@@ -70,7 +79,7 @@ src/
 └── ...
 ```
 
-安全模型与数据来源细节见 `CONTRACT.md`、`docs/data-sources.md`。基于 [MIT License](LICENSE) 开源。
+安全模型与数据来源细节见 `docs/CONTRACT.md`、`docs/CONTEXT.md`、`docs/data-sources.md`。基于 [MIT License](LICENSE) 开源。
 
 ## 更新日志
 

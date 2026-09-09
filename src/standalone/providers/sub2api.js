@@ -3,7 +3,7 @@
 //   mode=quota_limited：quota{limit,used,remaining,unit:USD} + rate_limits[]{window:5h|1d|7d, limit, used, remaining, reset_at?}
 //   mode=unrestricted + 订阅分组：subscription.{daily,weekly,monthly}_{usage,limit}_usd + planName
 //   mode=unrestricted + 钱包：balance（USD）
-import { QuotaError } from './http.js';
+import { QuotaError, parseJson } from './http.js';
 
 function clampPct(n) {
   return Math.min(100, Math.max(0, n));
@@ -111,15 +111,7 @@ export default {
     };
   },
   parseResponse(status, bodyText) {
-    if (status === 401 || status === 403) throw new QuotaError('auth_expired', `sub2api http ${status}`);
-    if (status === 429) throw new QuotaError('rate_limited', 'sub2api http 429');
-    if (status !== 200) throw new QuotaError('unavailable', `sub2api http ${status}`);
-    let json;
-    try {
-      json = JSON.parse(bodyText);
-    } catch {
-      throw new QuotaError('upstream_changed', 'sub2api: body is not json');
-    }
+    const json = parseJson(status, bodyText, 'sub2api');
     return parseUsage(json);
   },
 };

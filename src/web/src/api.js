@@ -21,6 +21,7 @@ function msgFor(code) {
     upstream: '上游取数失败',
     auth_expired: '凭证已过期',
     rate_limited: '被限流，请稍后再试',
+    refresh_throttled: '刷新太频繁，请稍后再试',
     unavailable: '暂不可用',
     upstream_changed: '上游响应结构变更',
   };

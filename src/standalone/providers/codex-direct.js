@@ -1,4 +1,4 @@
-import { QuotaError } from './http.js';
+import { QuotaError, parseJson } from './http.js';
 
 const ENDPOINT = 'https://chatgpt.com/backend-api/wham/usage';
 const USER_AGENT = 'codex_cli_rs/0.76.0 (Debian 13.0.0; x86_64) WindowsTerminal';
@@ -87,15 +87,7 @@ export default {
     };
   },
   parseResponse(status, bodyText) {
-    if (status === 401 || status === 403) throw new QuotaError('auth_expired', `codex-direct http ${status}`);
-    if (status === 429) throw new QuotaError('rate_limited', 'codex-direct http 429');
-    if (status !== 200) throw new QuotaError('unavailable', `codex-direct http ${status}`);
-    let json;
-    try {
-      json = JSON.parse(bodyText);
-    } catch {
-      throw new QuotaError('upstream_changed', 'codex-direct: body is not json');
-    }
+    const json = parseJson(status, bodyText, 'codex-direct');
     return parseWhamUsage(json);
   },
 };

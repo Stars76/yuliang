@@ -1,4 +1,4 @@
-import { QuotaError } from './http.js';
+import { QuotaError, parseJson } from './http.js';
 
 const MAIN_ENDPOINT = 'https://api.commandcode.ai/alpha/billing/credits';
 const EXTRA_ENDPOINTS = [
@@ -318,15 +318,7 @@ export default {
     }));
   },
   parseResponse(status, bodyText, extras) {
-    if (status === 401 || status === 403) throw new QuotaError('auth_expired', `command-code http ${status}`);
-    if (status === 429) throw new QuotaError('rate_limited', 'command-code http 429');
-    if (status !== 200) throw new QuotaError('unavailable', `command-code http ${status}`);
-    let main;
-    try {
-      main = JSON.parse(bodyText);
-    } catch {
-      throw new QuotaError('upstream_changed', 'command-code: credits body is not json');
-    }
+    const main = parseJson(status, bodyText, 'command-code', 'command-code: credits body is not json');
     const monthly = parseCredits(main);
     const windows = [];
     mergeWindow(windows, monthly);

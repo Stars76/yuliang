@@ -1,6 +1,6 @@
 // DeepSeek —— kind:'balance'，GET https://api.deepseek.com/user/balance（Bearer）
 // 官方响应：{is_available: boolean, balance_infos: [{currency, total_balance, granted_balance, topped_up_balance}]}（金额为字符串）
-import { QuotaError } from './http.js';
+import { QuotaError, parseJson } from './http.js';
 
 const ENDPOINT = 'https://api.deepseek.com/user/balance';
 
@@ -26,15 +26,7 @@ export default {
     };
   },
   parseResponse(status, bodyText) {
-    if (status === 401 || status === 403) throw new QuotaError('auth_expired', `deepseek http ${status}`);
-    if (status === 429) throw new QuotaError('rate_limited', 'deepseek http 429');
-    if (status !== 200) throw new QuotaError('unavailable', `deepseek http ${status}`);
-    let json;
-    try {
-      json = JSON.parse(bodyText);
-    } catch {
-      throw new QuotaError('upstream_changed', 'deepseek: body is not json');
-    }
+    const json = parseJson(status, bodyText, 'deepseek');
     if (!json || typeof json !== 'object') {
       throw new QuotaError('upstream_changed', 'deepseek: body is not an object');
     }
