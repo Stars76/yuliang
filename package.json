@@ -50,11 +50,14 @@
         "nsis"
       ],
       "icon": "src/standalone/electron/icon.ico",
-      "signAndEditExecutable": false
+      "signAndEditExecutable": true
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "src/standalone/electron/icon.ico",
+      "uninstallerIcon": "src/standalone/electron/icon.ico",
+      "include": "installer.nsh"
     }
   }
 }
