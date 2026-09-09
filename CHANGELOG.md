@@ -8,6 +8,11 @@
 > - 语义：`MAJOR.MINOR.PATCH`。破坏性大改 → MAJOR；新增功能（如新平台/新组件）→ MINOR；修 bug/小改 → PATCH。
 > - 改完重新出包：`npm run dist:win`（Windows）、安卓见 `src/standalone/capacitor/README.md`。
 
+## 1.8.2 — 2026-09-09
+- **Windows 图标圆角化（微信风）**：`icon.ico` 重制为品牌蓝 `#6AC1FF` 圆角 tile + 白色 XX（7 尺寸 PNG-in-ICO，16~256px，圆角半径 22%）。主程序 exe / 安装包 / 卸载程序 / 开始菜单与桌面快捷方式 / 任务栏图标全部统一为圆角样式，与移动端观感对齐。
+- **Windows 安装目录改 yuliang**：新增 `build/installer.nsh`（NSIS include），把 electron-builder 默认目录名覆盖为 `yuliang`；安装到 `%LOCALAPPDATA%\Programs\yuliang`，主程序仍为 `余量.exe`、卸载 `Uninstall 余量.exe`、快捷方式 `余量`。`signAndEditExecutable` 开启以将图标内嵌进主程序 exe（需管理员/CI 环境构建）。
+- 版本 1.8.2（安卓 versionCode 19）。
+
 ## 1.8.0 — 2026-09-09
 - **工程重构：统一 provider 解析辅助**：`providers/http.js` 新增 `httpStatusToError` / `parseJson`，把 12 个 provider 重复的「HTTP 状态 → QuotaError 映射」与「JSON 解析」收敛为共享函数（401/403/429/非200/坏 JSON 分支全部对齐），行为与错误类型保持不变。Codex 的 `checkHttp` 也改走同一映射。
 - **手动刷新全局限流**：`refreshQuota` 每分钟最多 5 次，超出反馈「刷新太频繁」，与 `docs/data-sources.md` 的承诺一致；后台/静默刷新不受影响。附 1 个限流单测。

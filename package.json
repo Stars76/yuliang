@@ -2,7 +2,7 @@
   "name": "quota-dashboard",
   "private": true,
   "type": "module",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "余量 · 单机离线额度面板（Windows / Android）",
   "author": "Stars76",
   "license": "MIT",
