@@ -9,7 +9,7 @@
 > - 改完重新出包：`npm run dist:win`（Windows）、安卓见 `src/standalone/capacitor/README.md`。
 
 ## 1.8.2 — 2026-09-09
-- **Windows 图标圆角化（微信风）**：`icon.ico` 重制为品牌蓝 `#6AC1FF` 圆角 tile + 白色 XX（7 尺寸 PNG-in-ICO，16~256px，圆角半径 22%）。主程序 exe / 安装包 / 卸载程序 / 开始菜单与桌面快捷方式 / 任务栏图标全部统一为圆角样式，与移动端观感对齐。
+- **Windows 图标圆角化**：`icon.ico` 重制为 7 尺寸 PNG-in-ICO（16~256px），**保留原图配色与比例（白底 + 浅蓝 XX，像素 100% 一致），仅将四角裁为圆角**（半径 22%，圆角外透明），观感对齐移动端圆角 tile。主程序 exe / 安装包 / 卸载程序 / 开始菜单与桌面快捷方式 / 任务栏图标全部统一。
 - **Windows 安装目录改 yuliang**：新增 `build/installer.nsh`（NSIS include），把 electron-builder 默认目录名覆盖为 `yuliang`；安装到 `%LOCALAPPDATA%\Programs\yuliang`，主程序仍为 `余量.exe`、卸载 `Uninstall 余量.exe`、快捷方式 `余量`。`signAndEditExecutable` 开启以将图标内嵌进主程序 exe（需管理员/CI 环境构建）。
 - 版本 1.8.2（安卓 versionCode 19）。
 
