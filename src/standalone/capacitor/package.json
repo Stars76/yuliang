@@ -4,6 +4,7 @@
   "version": "1.8.0",
   "type": "module",
   "scripts": {
+    "build": "vite build && cap sync android",
     "build:web": "vite build",
     "add:android": "cap add android",
     "sync": "cap sync",
