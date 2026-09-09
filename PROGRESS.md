@@ -51,4 +51,13 @@
 - [x] 安装目录 yuliang（实测）
 - [x] exe/卸载/快捷方式名保持 余量（实测）
 - [x] setup/卸载/主程序 exe 图标 = XX（config + rcedit 实测）
+- [x] Windows 图标改圆角（微信风）：见下
+
+## Windows 图标圆角化（微信风，蓝底白标）
+- **背景**：安卓启动图标已是「圆角 tile」；Windows `icon.ico` 原是没圆角的裸 XX。用户要求 Windows 图标也圆角、像微信更高级。
+- **方案**：选中「B 版」= 品牌蓝 `#6AC1FF` 圆角 tile + 白色 XX（微信式纯色 tile + 白色 logo）。用 System.Drawing 生成 7 尺寸（16/24/32/48/64/128/256）PNG-in-ICO，重写 `src/standalone/electron/icon.ico`（20615 → 9529 字节），结构合法（count=7、offset/bytes 正确），256px 预览效果良好。
+- **覆盖范围**：`icon.ico` 是 Windows 全部图标的唯一来源（`win.icon` + `nsis.installerIcon/uninstallerIcon` + main.js BrowserWindow icon）→ 主程序 exe、setup.exe、卸载 exe、开始菜单/桌面快捷方式、任务栏/窗口都随之圆角。
+- **生效方式**：需重新构建。主程序 exe 内嵌标走 `signAndEditExecutable:true`（rcedit），本机因 winCodeSign 符号链接权限无法构建 → **需 CI（windows-latest 管理员）或开启开发者模式的机器 `npm run dist:win`**。
+- **⚠️ 一致性提示**：`icon.ico` 由 `src/web/public/icons/logo.png`（扁平蓝 XX）重制而来，若日后有人再从 logo.png 重新生成 will lose 圆角；如需可维护，建议把圆角母版存成独立 PNG 或加生成脚本。
+- **版本**：按 CHANGELOG 约定，此改动需升版本（如 1.8.2）再打 `v1.8.2` 标签触发 release.yml 重出包。
 - [x] PROGRESS 收尾
