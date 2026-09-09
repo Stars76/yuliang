@@ -4,6 +4,7 @@
   "type": "module",
   "version": "1.8.0",
   "description": "余量 · 单机离线额度面板（Windows / Android）",
+  "author": "Stars76",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -20,7 +21,7 @@
     "build:web": "npm --prefix src/web run build",
     "build:android-web": "npm --prefix src/standalone/capacitor run build",
     "electron": "electron .",
-    "dist:win": "electron-builder --win",
+    "dist:win": "electron-builder --win --publish never",
     "release:bump": "node scripts/bump-version.mjs"
   },
   "devDependencies": {
